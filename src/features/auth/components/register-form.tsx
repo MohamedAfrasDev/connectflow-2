@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { authClient } from "@/lib/auth-client";
+import Image from "next/image";
 
 const registerSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -94,12 +95,26 @@ export function RegisterForm() {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
                             {/* Social buttons */}
                             <div className="flex flex-col gap-4">
-                                <Button variant="outline" className="w-full" type="button" disabled={isPending}>
-                                    Continue with GitHub
-                                </Button>
-                                <Button variant="outline" className="w-full" type="button" disabled={isPending}>
-                                    Continue with Google
-                                </Button>
+                            <Button
+                                            variant="outline"
+                                            className="w-full"
+                                            type="button"
+                                            disabled={isPending}
+                                        >
+                                            <Image src="/logos/github.svg" width={20} height={20} alt="GitHub" />
+
+                                            Continue with GitHub
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="w-full"
+                                            type="button"
+                                            disabled={isPending}
+                                        >
+                                            <Image src="/logos/google.svg" width={20} height={20} alt="Google" />
+
+                                            Continue with Google
+                                        </Button>
                             </div>
 
                             {/* Email/password fields */}

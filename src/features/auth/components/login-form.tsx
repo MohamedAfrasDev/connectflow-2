@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -50,7 +51,18 @@ export function LoginForm() {
     });
 
     const onSubmit = async (values: LoginFormValues) => {
-        console.log(values);
+        await authClient.signIn.email({
+            email: values.email,
+            password: values.password,
+            callbackURL: "/",
+        }, {
+            onSuccess: () => {
+                router.push("/");
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message);
+            }
+        })
     };
 
     const isPending = form.formState.isSubmitting;
@@ -76,6 +88,8 @@ export function LoginForm() {
                                             type="button"
                                             disabled={isPending}
                                         >
+                                            <Image src="/logos/github.svg" width={20} height={20} alt="GitHub" />
+
                                             Continue with GitHub
                                         </Button>
                                         <Button
@@ -84,6 +98,8 @@ export function LoginForm() {
                                             type="button"
                                             disabled={isPending}
                                         >
+                                            <Image src="/logos/google.svg" width={20} height={20} alt="Google" />
+
                                             Continue with Google
                                         </Button>
                                     </div>
@@ -122,14 +138,14 @@ export function LoginForm() {
                                         />
 
                                         <Button type="submit"
-                                        className="w-full" disabled={isPending}>
+                                            className="w-full" disabled={isPending}>
                                             Login
                                         </Button>
                                     </div>
                                     <div className="text-center text-sm">
                                         Don&apos;t have an account?{" "}
                                         <Link href="/signup" className="underline underline-offset-4">
-                                        Sign up
+                                            Sign up
                                         </Link>
                                     </div>
                                 </div>
