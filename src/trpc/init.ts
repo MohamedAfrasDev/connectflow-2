@@ -52,7 +52,7 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx,
       ) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Active subscription required"
+          message: `Active subscription required ${customer.activeSubscriptions.length}`
         });
       }
 

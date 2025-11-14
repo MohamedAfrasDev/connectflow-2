@@ -20,10 +20,14 @@ export const auth = betterAuth({
             client: polarClient,
             createCustomerOnSignUp: true,
             use: [
+                portal({
+                    // You can use the same URL or a different one (e.g., /settings)
+                    returnUrl: process.env.POLAR_SUCCESS_URL, 
+                }),
                 checkout({
                     products: [
                         {
-                            productId: "fd793d08-ac96-4fd2-9d5c-5fb8d068677b",
+                            productId: "a1c18c22-239d-4e05-b421-179349c6cc74",
                             slug: "pro",
                         }
                     ],
