@@ -182,14 +182,12 @@ export const LoadingView = ({
     return (
         <div className="flex justify-center items-center h-full flex-1 flex-col gap-y-4">
             <Loader2Icon className="size-6 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">
-
-                {!!message && (
+          
+            {!!message && (
                     <p className="text-sm text-muted-foreground">
                         {message}
                     </p>
                 )}
-            </p>
         </div>
     )
 };
@@ -203,14 +201,11 @@ export const ErrorView = ({
     return (
         <div className="flex justify-center items-center h-full flex-1 flex-col gap-y-4">
             <AlertTriangleIcon className="size-6  text-red-500" />
-            <p className="text-sm text-muted-foreground">
-
-                {!!message && (
+            {!!message && (
                     <p className="text-sm text-muted-foreground">
                         {message}
                     </p>
                 )}
-            </p>
         </div>
     )
 };
