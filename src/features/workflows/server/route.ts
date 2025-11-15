@@ -54,7 +54,7 @@ export const workflowsRouter = createTRPCRouter({
                     z.object({
                         id: z.string(),
                         type: z.string().nullish(),
-                        positition: z.object({ x: z.number(), y: z.number() }),
+                        position: z.object({ x: z.number(), y: z.number() }),
                         data: z.record(z.string(), z.any()).optional(),
                     }),
                 ),
@@ -87,7 +87,7 @@ export const workflowsRouter = createTRPCRouter({
                         workflowId: id,
                         name: node.type || "unknown",
                         type: node.type as NodeType,
-                        position: node.positition,
+                        position: node.position,
                         data: node.data || {},
                     })),
                 });

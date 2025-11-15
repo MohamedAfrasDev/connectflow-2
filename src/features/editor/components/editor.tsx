@@ -53,6 +53,14 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         nodeTypes={nodeComponent}
         onInit={setEditor}
         fitView
+        snapGrid={[10, 10]}
+        snapToGrid
+        
+
+        zoomOnScroll
+        
+        panOnDrag={false}
+        selectionOnDrag
        
       /> 
       <Background/>
