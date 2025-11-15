@@ -19,19 +19,22 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const nodeStatus = 'initial';
-    const {setNodes} = useReactFlow();
+    const { setNodes } = useReactFlow();
 
     const handleSubmit = (values: {
+        variableName?: string;
         endpoint: string;
         method: string;
         body?: string;
     }) => {
         setNodes((nodes) => nodes.map((node) => {
-            if(node.id === props.id) {
+            if (node.id === props.id) {
                 return {
                     ...node,
                     data: {
                         ...node.data,
+                        variableName: values.variableName,   // <<< REQUIRED
+
                         endpoint: values.endpoint,
                         method: values.method,
                         body: values.body
@@ -46,8 +49,8 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
     const handleOpenSettings = () => setDialogOpen(true);
     const nodeData = props.data;
     const description = nodeData?.endpoint
-    ? `${nodeData.method || "GET"}: ${nodeData.endpoint}`
-    : "Not configured";
+        ? `${nodeData.method || "GET"}: ${nodeData.endpoint}`
+        : "Not configured";
 
 
 
@@ -58,9 +61,8 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onSubmit={handleSubmit}
-                defaultEndpoint={nodeData.endpoint}
-                defaultMethod={nodeData.method}
-                defaultBody={nodeData.body} 
+                defaultValues={nodeData}
+
             />
             <BaseExecutionNode
                 {...props}
