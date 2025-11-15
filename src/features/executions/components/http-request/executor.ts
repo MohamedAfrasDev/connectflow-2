@@ -6,119 +6,125 @@ import Handlebars from "handlebars";
 import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 Handlebars.registerHelper("json", (context) => {
-    const jsonString = JSON.stringify(context, null, 2);
-    const safeString = new Handlebars.SafeString(jsonString);
-
-
-    return safeString;
+  return new Handlebars.SafeString(JSON.stringify(context, null, 2));
 });
 
 type HttpRequestData = {
-    variableName: string;
-    endpoint: string;
-    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    body?: string;
+  variableName: string;
+  endpoint: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  body?: string;
 };
 
 export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
-    data,
-    context,
-    nodeId,
-    step,
-    publish,
+  data,
+  context,
+  nodeId,
+  step,
+  publish,
 }) => {
+  const send = (status: "loading" | "success" | "error") =>
+    publish(httpRequestChannel().status({ nodeId, status }));
 
-    await publish(
-        httpRequestChannel().status({
-            nodeId,
-            status: "loading"
-        }),
+  await send("loading");
+
+  if (!data.endpoint?.trim()) {
+    await send("error");
+    throw new NonRetriableError(
+      "HTTP Request node: No endpoint configured (empty string)."
     );
-    if (!data.endpoint) {
-        await publish(
-            httpRequestChannel().status({
-                nodeId,
-                status: "error"
-            }),
-        )
-        throw new NonRetriableError("HTTP Request node: no endpoint configured");
-    }
+  }
 
-    if (!data.variableName) {
-        await publish(
-            httpRequestChannel().status({
-                nodeId,
-                status: "error"
-            }),
-        )
-        throw new NonRetriableError("Variable name configured");
-    }
-    if (!data.method) {
-        await publish(
-            httpRequestChannel().status({
-                nodeId,
-                status: "error"
-            }),
-        )
-        throw new NonRetriableError("Method configured");
-    }
+  if (!data.variableName) {
+    await send("error");
+    throw new NonRetriableError("HTTP Request node: Variable name missing.");
+  }
 
-    try{
+  if (!data.method) {
+    await send("error");
+    throw new NonRetriableError("HTTP Request node: HTTP method missing.");
+  }
+
+  try {
     const result = await step.run("http-request", async () => {
-        const endpoint = Handlebars.compile(data.endpoint)(context);
-        const method = data.method;
+      // ---------- HANDLEBARS RESOLUTION ----------
+      const interpolate = (template: string) => {
+        const compiled = Handlebars.compile(template);
+        const output = compiled(context);
 
-        const options: KyOptions = { method };
-
-        if (["POST", "PUT", "PATCH"].includes(method) && data.body) {
-            const resolved = Handlebars.compile(data.body || "{}")(context);
-            JSON.parse(resolved);
-            options.body = resolved;
-            options.headers = {
-                "Content-Type": "application/json"
-            };
+        if (!output || output.trim() === "") {
+          throw new NonRetriableError(
+            `Template resolved to empty string:\n${template}\n` +
+              `→ Missing variable in context?`
+          );
         }
 
-        // Execute request
-        const response = await ky(endpoint, options);
+        return output;
+      };
 
-        const contentType = response.headers.get("content-type");
-        const responseData = contentType?.includes("application/json")
-            ? await response.json()
-            : await response.text();
+      let endpoint = interpolate(data.endpoint);
 
+      // ---------- RELATIVE URL FIX ----------
+      if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+        const base =
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        endpoint = base + (endpoint.startsWith("/") ? endpoint : "/" + endpoint);
+      }
 
-        const responsePayload = {
-            httpResponse: {
-                status: response.status,
-                statusText: response.statusText,
-                data: responseData,
-            },
-        };
+      // Final absolute URL check
+      try {
+        new URL(endpoint);
+      } catch {
+        throw new NonRetriableError(
+          `Invalid final URL: "${endpoint}" (after template resolution)`
+        );
+      }
 
-        // ALWAYS return WorkflowContext object
-        return {
-            ...context,
-            [data.variableName]: responsePayload,
-        };
+      const method = data.method;
+      const options: KyOptions = { method };
+
+      // ---------- BODY HANDLING ----------
+      if (["POST", "PUT", "PATCH"].includes(method) && data.body) {
+        const resolvedBody = interpolate(data.body);
+
+        try {
+          JSON.parse(resolvedBody);
+        } catch {
+          throw new NonRetriableError(
+            `Request body is not valid JSON:\n${resolvedBody}`
+          );
+        }
+
+        options.body = resolvedBody;
+        options.headers = { "Content-Type": "application/json" };
+      }
+
+      // ---------- EXECUTE HTTP REQUEST ----------
+      const response = await ky(endpoint, options);
+
+      const contentType = response.headers.get("content-type");
+      const responseData = contentType?.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+      const responsePayload = {
+        httpResponse: {
+          status: response.status,
+          statusText: response.statusText,
+          data: responseData,
+        },
+      };
+
+      return {
+        ...context,
+        [data.variableName]: responsePayload,
+      };
     });
-    await publish(
-        httpRequestChannel().status({
-            nodeId,
-            status: "success"
-        }),
-    );
 
-
-    // result is already a WorkflowContext
+    await send("success");
     return result;
-} catch (error) {
-    await publish(
-        httpRequestChannel().status({
-            nodeId,
-            status: "error",
-        }),
-    );
-    throw error;
-}
+  } catch (err) {
+    await send("error");
+    throw err;
+  }
 };
