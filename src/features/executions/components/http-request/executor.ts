@@ -3,18 +3,19 @@ import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
 
 import Handlebars from "handlebars";
+import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
-   const safeString = new Handlebars.SafeString(jsonString);
+    const safeString = new Handlebars.SafeString(jsonString);
 
 
-   return safeString;
+    return safeString;
 });
 
 type HttpRequestData = {
     variableName: string;
-    endpoint: string; 
+    endpoint: string;
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: string;
 };
@@ -22,19 +23,47 @@ type HttpRequestData = {
 export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     data,
     context,
+    nodeId,
     step,
+    publish,
 }) => {
+
+    await publish(
+        httpRequestChannel().status({
+            nodeId,
+            status: "loading"
+        }),
+    );
     if (!data.endpoint) {
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            }),
+        )
         throw new NonRetriableError("HTTP Request node: no endpoint configured");
     }
 
     if (!data.variableName) {
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            }),
+        )
         throw new NonRetriableError("Variable name configured");
     }
     if (!data.method) {
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            }),
+        )
         throw new NonRetriableError("Method configured");
     }
 
+    try{
     const result = await step.run("http-request", async () => {
         const endpoint = Handlebars.compile(data.endpoint)(context);
         const method = data.method;
@@ -70,13 +99,26 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
         // ALWAYS return WorkflowContext object
         return {
             ...context,
-           [data.variableName]: responsePayload,
+            [data.variableName]: responsePayload,
         };
-       
-
-       
     });
+    await publish(
+        httpRequestChannel().status({
+            nodeId,
+            status: "success"
+        }),
+    );
+
 
     // result is already a WorkflowContext
     return result;
+} catch (error) {
+    await publish(
+        httpRequestChannel().status({
+            nodeId,
+            status: "error",
+        }),
+    );
+    throw error;
+}
 };

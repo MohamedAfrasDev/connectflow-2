@@ -14,7 +14,7 @@ interface BaseExecutionNodeProps extends NodeProps {
     name: string;
     description?: string;
     children?: ReactNode;
-       status?: NodeStatus;
+     status?: NodeStatus;
     onSettings?: () => void;
     onDoubleClick?: () => void;
 };
