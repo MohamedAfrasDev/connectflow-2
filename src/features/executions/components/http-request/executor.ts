@@ -10,9 +10,9 @@ Handlebars.registerHelper("json", (context) => {
 });
 
 type HttpRequestData = {
-  variableName: string;
-  endpoint: string;
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  variableName?: string;
+  endpoint?: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
 };
 
@@ -28,25 +28,26 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
 
   await send("loading");
 
-  if (!data.endpoint?.trim()) {
-    await send("error");
-    throw new NonRetriableError(
-      "HTTP Request node: No endpoint configured (empty string)."
-    );
-  }
-
-  if (!data.variableName) {
-    await send("error");
-    throw new NonRetriableError("HTTP Request node: Variable name missing.");
-  }
-
-  if (!data.method) {
-    await send("error");
-    throw new NonRetriableError("HTTP Request node: HTTP method missing.");
-  }
 
   try {
     const result = await step.run("http-request", async () => {
+      if (!data.endpoint?.trim()) {
+        await send("error");
+        throw new NonRetriableError(
+          "HTTP Request node: No endpoint configured (empty string)."
+        );
+      }
+    
+      if (!data.variableName) {
+        await send("error");
+        throw new NonRetriableError("HTTP Request node: Variable name missing.");
+      }
+    
+      if (!data.method) {
+        await send("error");
+        throw new NonRetriableError("HTTP Request node: HTTP method missing.");
+      }
+    
       // ---------- HANDLEBARS RESOLUTION ----------
       const interpolate = (template: string) => {
         const compiled = Handlebars.compile(template);
@@ -114,6 +115,8 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
           data: responseData,
         },
       };
+
+      const variableName = data.variableName;
 
       return {
         ...context,

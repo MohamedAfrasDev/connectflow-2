@@ -43,7 +43,13 @@ const triggerNodes: NodeTypeOption[] = [
         label: "Google Form",
         descritpion: "Runs the flow when a Google Form is submitted",
         icon: "/logos/googleform.svg"
-    }
+    },
+    {
+        type: NodeType.STRIPE_TRIGGER,
+        label: "Stripe Event",
+        descritpion: "Runs the flow when a Stripe Event is captured",
+        icon: "/logos/stripe.svg"
+    },
 ];
 
 
@@ -53,7 +59,13 @@ const executionNodes: NodeTypeOption[] = [
         label: "HTTP Request",
         descritpion: "Makes an HTTP request",
         icon: GlobeIcon,
-    }
+    },
+    {
+        type: NodeType.GEMINI,
+        label: "Gemini",
+        descritpion: "Use Google Gemini to generate text",
+        icon: "/logos/gemini.svg",
+    },
 ];
 
 interface NodeSelectorProps {
