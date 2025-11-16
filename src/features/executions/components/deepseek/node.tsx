@@ -3,31 +3,31 @@
 import { Node, NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";
-import {   OpenAIDialog, OpenAIFormValues } from "./dialog";
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { fetchOpenAIRealtimeToken } from "./action";
-import { OPENAI_CHANNEL_NAME } from "@/inngest/channels/openai";
+import { DEEPSEEK_CHANNEL_NAME } from "@/inngest/channels/deepseek";
+import { fetchDeepSeekRealtimeToken } from "./action";
+import { DeepSeekDialog, DeepSeekFormValues } from "./dialog";
 
-type OpenAINodeData = {
+type DeepSeekNodeData = {
     variableName?: string;
     systemPrompt?: string;
     userPrompt?: string;
 };
 
-type OpenAINodeType = Node<OpenAINodeData>;
+type DeepSeekNodeType = Node<DeepSeekNodeData>;
 
-export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
+export const DeepSeekNode = memo((props: NodeProps<DeepSeekNodeType>) => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const nodeStatus = useNodeStatus({
         nodeId: props.id,
-        channel: OPENAI_CHANNEL_NAME,
+        channel: DEEPSEEK_CHANNEL_NAME,
         topic: "status",
-        refreshToken: fetchOpenAIRealtimeToken
+        refreshToken: fetchDeepSeekRealtimeToken
     })
     const { setNodes } = useReactFlow();
 
-    const handleSubmit = (values: OpenAIFormValues) => {
+    const handleSubmit = (values: DeepSeekFormValues) => {
         setNodes((nodes) => nodes.map((node) => {
             if (node.id === props.id) {
                 return {
@@ -49,7 +49,7 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
     const handleOpenSettings = () => setDialogOpen(true);
     const nodeData = props.data;
     const description = nodeData?.userPrompt
-        ? `gpt-3.5-turbo : ${nodeData.userPrompt.slice(0,50)}...`
+        ? `deepseek-chat : ${nodeData.userPrompt.slice(0,50)}...`
         : "Not configured";
 
 
@@ -57,7 +57,7 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
     return (
         <>
 
-            <OpenAIDialog
+            <DeepSeekDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onSubmit={handleSubmit}
@@ -67,8 +67,8 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
             <BaseExecutionNode
                 {...props}
                 id={props.id}
-                icon="/logos/openai.svg"
-                name="OpenAI"
+                icon="/logos/deepseek.svg"
+                name="DeepSeek"
                 status={nodeStatus}
                 description={description}
                 onSettings={handleOpenSettings}
@@ -78,4 +78,4 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
     );
 });
 
-OpenAINode.displayName = "OpenAINode";
+DeepSeekNode.displayName = "DeepSeekNode";

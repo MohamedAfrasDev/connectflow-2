@@ -3,31 +3,31 @@
 import { Node, NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";
-import {   OpenAIDialog, OpenAIFormValues } from "./dialog";
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { fetchOpenAIRealtimeToken } from "./action";
-import { OPENAI_CHANNEL_NAME } from "@/inngest/channels/openai";
+import { PERPLEXITY_CHANNEL_NAME } from "@/inngest/channels/perplexity";
+import { fetchPerplexityRealtimeToken } from "./action";
+import { PerplexityDialog, PerplexityFormValues } from "./dialog";
 
-type OpenAINodeData = {
+type PerplexityNodeData = {
     variableName?: string;
     systemPrompt?: string;
     userPrompt?: string;
 };
 
-type OpenAINodeType = Node<OpenAINodeData>;
+type PerplexityNodeType = Node<PerplexityNodeData>;
 
-export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
+export const PerlexityNode = memo((props: NodeProps<PerplexityNodeType>) => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const nodeStatus = useNodeStatus({
         nodeId: props.id,
-        channel: OPENAI_CHANNEL_NAME,
+        channel: PERPLEXITY_CHANNEL_NAME,
         topic: "status",
-        refreshToken: fetchOpenAIRealtimeToken
+        refreshToken: fetchPerplexityRealtimeToken
     })
     const { setNodes } = useReactFlow();
 
-    const handleSubmit = (values: OpenAIFormValues) => {
+    const handleSubmit = (values: PerplexityFormValues) => {
         setNodes((nodes) => nodes.map((node) => {
             if (node.id === props.id) {
                 return {
@@ -49,7 +49,7 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
     const handleOpenSettings = () => setDialogOpen(true);
     const nodeData = props.data;
     const description = nodeData?.userPrompt
-        ? `gpt-3.5-turbo : ${nodeData.userPrompt.slice(0,50)}...`
+        ? `sonar : ${nodeData.userPrompt.slice(0,50)}...`
         : "Not configured";
 
 
@@ -57,7 +57,7 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
     return (
         <>
 
-            <OpenAIDialog
+            <PerplexityDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onSubmit={handleSubmit}
@@ -67,8 +67,8 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
             <BaseExecutionNode
                 {...props}
                 id={props.id}
-                icon="/logos/openai.svg"
-                name="OpenAI"
+                icon="/logos/perplexity.svg"
+                name="Perplexity"
                 status={nodeStatus}
                 description={description}
                 onSettings={handleOpenSettings}
@@ -78,4 +78,4 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
     );
 });
 
-OpenAINode.displayName = "OpenAINode";
+PerlexityNode.displayName = "PerlexityNode";

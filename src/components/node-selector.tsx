@@ -78,6 +78,18 @@ const executionNodes: NodeTypeOption[] = [
         descritpion: "Use Anthropic to generate text",
         icon: "/logos/anthropic.svg",
     },
+    {
+        type: NodeType.DEEPSEEK,
+        label: "DeepSeek",
+        descritpion: "Use DeepSeek to generate text",
+        icon: "/logos/deepseek.svg",
+    },
+    {
+        type: NodeType.PERPLEXITY,
+        label: "Perplexity",
+        descritpion: "Use Perplexity to generate text",
+        icon: "/logos/perplexity.svg",
+    },
 ];
 
 interface NodeSelectorProps {

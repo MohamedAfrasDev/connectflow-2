@@ -12,6 +12,7 @@ import { fetchGeminiRealtimeToken } from "./action";
 type GeminiNodeData = {
     variableName?: string;
     systemPrompt?: string;
+    credentialId?:string;
     userPrompt?: string;
 };
 
@@ -36,7 +37,7 @@ export const GeminiNode = memo((props: NodeProps<GeminiNodeType>) => {
                     data: {
                         ...node.data,
                         variableName: values.variableName,   // <<< REQUIRED
-
+                        credentialId: values.credentialId,
                         systemPrompt: values.systemPrompt,
                         userPrompt: values.userPrompt
                     }

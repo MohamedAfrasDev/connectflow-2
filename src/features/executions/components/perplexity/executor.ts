@@ -1,8 +1,8 @@
 import type { NodeExecutor } from "@/features/executions/types";
-import { openAIChannel } from "@/inngest/channels/openai";
+import { perplexityChannel } from "@/inngest/channels/perplexity";
 import prisma from "@/lib/db";
 
-import { createOpenAI} from "@ai-sdk/openai";
+import { createPerplexity} from "@ai-sdk/perplexity";
 import { generateText} from "ai";
 
 
@@ -13,51 +13,50 @@ Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
 });
 
-type OpenAIData = {
+type PerplexityData = {
   variableName?: string;
   systemPrompt?: string;
-  credentialId?: string;
   userPrompt?: string;
+  credentialId?:string;
 };
 
-export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
+export const perplexityExecutor: NodeExecutor<PerplexityData> = async ({
   data,
   context,
   nodeId,
   step,
   publish,
 }) => {
- await   publish(openAIChannel().status({ nodeId, status:"loading" }));
+ await   publish(perplexityChannel().status({ nodeId, status:"loading" }));
 
 
  if(!data.variableName) {
   await publish(
-    openAIChannel().status({
+    perplexityChannel().status({
       nodeId,
       status: "error"
     })
   );
-  throw new NonRetriableError("OpenAI node: Variable name is missing")
+  throw new NonRetriableError("Perplexity node: Variable name is missing")
  }
-
  if(!data.credentialId) {
   await publish(
-    openAIChannel().status({
+    perplexityChannel().status({
       nodeId,
       status: "error"
     })
   );
-  throw new NonRetriableError("OpenAI node: Credential is missing")
+  throw new NonRetriableError("Perplexity node: Credential is missing")
  }
 
  if(!data.userPrompt) {
   await publish(
-    openAIChannel().status({
+    perplexityChannel().status({
       nodeId,
       status: "error"
     })
   );
-  throw new NonRetriableError("OpenAI node: USer prompt is missing")
+  throw new NonRetriableError("Perplexity node: USer prompt is missing")
  }
 
  const systemPrompt = data.systemPrompt
@@ -76,21 +75,20 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
  });
 
  if(!credential) {
-  throw new NonRetriableError("Gemini node: Credential not found");
+  throw new NonRetriableError("Perplexity node: Credential not found");
  }
 
- 
- const openai = createOpenAI({
+ const perplexity = createPerplexity({
   apiKey: credential.value
  });
 
 
  try {
   const { steps } = await step.ai.wrap(
-    "openai-generate-text",
+    "perplexity-generate-text",
     generateText,
     {
-      model: openai("gpt-3.5-turbo"),
+      model: perplexity("sonar"),
       system: systemPrompt,
       prompt: userPrompt,
       experimental_telemetry: {
@@ -105,7 +103,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
 
 
   await publish(
-    openAIChannel().status({
+    perplexityChannel().status({
       nodeId,
       status: "success"
     })
@@ -121,7 +119,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
   
  } catch (error){
   await publish(
-    openAIChannel().status({
+    perplexityChannel().status({
       nodeId,
       status: "error"
     }),

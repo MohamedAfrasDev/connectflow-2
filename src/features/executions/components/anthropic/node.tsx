@@ -12,6 +12,7 @@ type AnthroipcNodeData = {
     variableName?: string;
     systemPrompt?: string;
     userPrompt?: string;
+    credentialId?: string;
 };
 
 type AnthropicNodeType = Node<AnthroipcNodeData>;
@@ -35,7 +36,7 @@ export const AnthropicNode = memo((props: NodeProps<AnthropicNodeType>) => {
                     data: {
                         ...node.data,
                         variableName: values.variableName,   // <<< REQUIRED
-
+                        credentialId: values.credentialId,
                         systemPrompt: values.systemPrompt,
                         userPrompt: values.userPrompt
                     }
@@ -49,7 +50,7 @@ export const AnthropicNode = memo((props: NodeProps<AnthropicNodeType>) => {
     const handleOpenSettings = () => setDialogOpen(true);
     const nodeData = props.data;
     const description = nodeData?.userPrompt
-        ? `claude-sonnet-4-5 : ${nodeData.userPrompt.slice(0,50)}...`
+        ? `claude-sonnet-4-5 : ${nodeData.userPrompt.slice(0, 50)}...`
         : "Not configured";
 
 

@@ -46,42 +46,43 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Variable name is required" })
     .regex(/^[A-Za-z_][A-Za-z0-9_]*$/, {
-      message: 
+      message:
         "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores",
     }),
-  credentialId: z.string().min(1, "Credential is required"),
+    credentialId: z.string().min(1, "Credential is required"),
+
   systemPrompt: z.string().optional(),
   userPrompt: z.string().min(1, "User prompt is required"),
 });
 
-export type GeminiFormValues = z.infer<typeof formSchema>;
+export type DeepSeekFormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (value: GeminiFormValues) => void;
-  defaultValues?: Partial<GeminiFormValues>;
+  onSubmit: (value: DeepSeekFormValues) => void;
+  defaultValues?: Partial<DeepSeekFormValues>;
 }
 
-export const GeminiDialog = ({
+export const DeepSeekDialog = ({
   open,
   onOpenChange,
   onSubmit,
   defaultValues = {},
 }: Props) => {
-
   const {
 
     data: credentials,
     isLoading: isLoadingCredentials,
-  } = useCredentialsByType(CredentialType.GEMINI);
-  const form = useForm<GeminiFormValues>({
+  } = useCredentialsByType(CredentialType.DEEPSEEK);
+  const form = useForm<DeepSeekFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       variableName: defaultValues.variableName || "",
       systemPrompt: defaultValues.systemPrompt || "",
       userPrompt: defaultValues.userPrompt || "",
       credentialId: defaultValues.credentialId || "",
+
     },
   });
 
@@ -98,10 +99,10 @@ export const GeminiDialog = ({
     }
   }, [open, defaultValues]);
 
-  const varPreview = form.watch("variableName") || "myGemini";
+  const varPreview = form.watch("variableName") || "myDeepSeek";
 
 
-  const handleSubmit = (values: GeminiFormValues) => {
+  const handleSubmit = (values: DeepSeekFormValues) => {
     onSubmit(values);
     onOpenChange(false);
   };
@@ -110,7 +111,7 @@ export const GeminiDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gemini Configuration</DialogTitle>
+          <DialogTitle>DeepSeek Configuration</DialogTitle>
           <DialogDescription>
             Configure the AI model and prompt for this node.
           </DialogDescription>
@@ -118,7 +119,7 @@ export const GeminiDialog = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-
+         
             {/* VARIABLE NAME */}
             <FormField
               control={form.control}
@@ -127,7 +128,7 @@ export const GeminiDialog = ({
                 <FormItem>
                   <FormLabel>Variable Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="myGemini" {...field} />
+                    <Input placeholder="myDeepSeek" {...field} />
                   </FormControl>
                   <FormDescription>
                     Use this name to reference the result in other nodes:
@@ -139,14 +140,12 @@ export const GeminiDialog = ({
                 </FormItem>
               )}
             />
-
-
-            <FormField
+  <FormField
               control={form.control}
               name="credentialId"
               render={({ field }) => <FormItem>
                 <FormLabel>
-                  Gemini Credential
+                  DeepSeek Credential
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -156,7 +155,7 @@ export const GeminiDialog = ({
 
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a Credential"/>
+                      <SelectValue placeholder="Select a Credential" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -166,7 +165,7 @@ export const GeminiDialog = ({
                         value={credential.id}
                       >
                         <div className="flex items-center gap-2">
-                          <Image src='/logos/gemini.svg' alt="Gemini" width={16} height={16} />
+                          <Image src='/logos/deepseek.svg' alt="DeepSeek" width={16} height={16} />
                           {credential.name}
                         </div>
                       </SelectItem>
@@ -176,6 +175,7 @@ export const GeminiDialog = ({
                 <FormMessage />
               </FormItem>}
             />
+
 
 
             <FormField
