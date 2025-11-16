@@ -1,6 +1,7 @@
 import { InitialNode } from "@/components/initial-node";
 import { AnthropicNode } from "@/features/executions/components/anthropic/node";
 import { DeepSeekNode } from "@/features/executions/components/deepseek/node";
+import { DiscordNode } from "@/features/executions/components/discord/node";
 import { GeminiNode } from "@/features/executions/components/gemini/node";
 import { HttpRequestNode } from "@/features/executions/components/http-request/node";
 import { OpenAINode } from "@/features/executions/components/openai/node";
@@ -24,6 +25,7 @@ export const nodeComponent = {
    [NodeType.DEEPSEEK]: DeepSeekNode,
 
    [NodeType.PERPLEXITY]: PerlexityNode,
+   [NodeType.DISCORD]: DiscordNode,
 
 
 } as const;

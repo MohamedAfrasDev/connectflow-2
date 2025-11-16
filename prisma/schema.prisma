@@ -101,6 +101,7 @@ enum CredentialType {
   GEMINI
   DEEPSEEK
   PERPLEXITY
+ 
 }
 
 model Workflow {
@@ -125,6 +126,8 @@ enum NodeType {
   OPENAI
   DEEPSEEK
   PERPLEXITY
+  DISCORD
+  SLACK
 }
 model Node {
   id String @id @default(cuid())

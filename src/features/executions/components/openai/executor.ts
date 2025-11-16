@@ -24,6 +24,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
   data,
   context,
   nodeId,
+  userId,
   step,
   publish,
 }) => {
@@ -57,7 +58,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
       status: "error"
     })
   );
-  throw new NonRetriableError("OpenAI node: USer prompt is missing")
+  throw new NonRetriableError("OpenAI node: User prompt is missing")
  }
 
  const systemPrompt = data.systemPrompt
@@ -71,6 +72,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
   return prisma.credential.findUnique({
     where: {
       id: data.credentialId,
+      userId
     },
   });
  });

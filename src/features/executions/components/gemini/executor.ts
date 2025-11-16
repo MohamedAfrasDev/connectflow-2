@@ -24,6 +24,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
   data,
   context,
   nodeId,
+  userId,
   step,
   publish,
 }) => {
@@ -56,7 +57,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
       status: "error"
     })
   );
-  throw new NonRetriableError("Gemini node: USer prompt is missing")
+  throw new NonRetriableError("Gemini node: User prompt is missing")
  }
 
  const systemPrompt = data.systemPrompt
@@ -69,6 +70,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
   return prisma.credential.findUnique({
     where: {
       id: data.credentialId,
+      userId
     },
   });
  });

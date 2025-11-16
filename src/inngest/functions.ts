@@ -13,6 +13,7 @@ import { openAIChannel } from "./channels/openai";
 import { anthropicChannel } from "./channels/anthropic";
 import { deepSeekChannel } from "./channels/deepseek";
 import { perplexityChannel } from "./channels/perplexity";
+import { discordChannel } from "./channels/discord";
 
 
 
@@ -33,6 +34,7 @@ export const executeWorkflow = inngest.createFunction(
       anthropicChannel(),
       deepSeekChannel(),
       perplexityChannel(),
+      discordChannel(),
     ]
   },
   async ({ event, step, publish }) => {
@@ -55,6 +57,17 @@ export const executeWorkflow = inngest.createFunction(
 
     });
 
+    const userId = await step.run("find-user-id",async () => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where: { id: workflowId},
+        select: {
+          userId: true,
+        }
+      });
+
+      return workflow.userId;
+    });
+
 
     let context = event.data.initialData || {};
 
@@ -63,6 +76,7 @@ export const executeWorkflow = inngest.createFunction(
       context = await executor({
         data: node.data as Record<string, unknown>,
         nodeId: node.id,
+        userId,
         context,
         step,
         publish,

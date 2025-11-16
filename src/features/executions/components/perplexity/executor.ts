@@ -25,6 +25,7 @@ export const perplexityExecutor: NodeExecutor<PerplexityData> = async ({
   context,
   nodeId,
   step,
+  userId,
   publish,
 }) => {
  await   publish(perplexityChannel().status({ nodeId, status:"loading" }));
@@ -56,7 +57,7 @@ export const perplexityExecutor: NodeExecutor<PerplexityData> = async ({
       status: "error"
     })
   );
-  throw new NonRetriableError("Perplexity node: USer prompt is missing")
+  throw new NonRetriableError("Perplexity node: User prompt is missing")
  }
 
  const systemPrompt = data.systemPrompt
@@ -70,6 +71,7 @@ export const perplexityExecutor: NodeExecutor<PerplexityData> = async ({
   return prisma.credential.findUnique({
     where: {
       id: data.credentialId,
+      userId
     },
   });
  });

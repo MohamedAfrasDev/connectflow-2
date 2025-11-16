@@ -66,11 +66,13 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       let endpoint = interpolate(data.endpoint);
 
       // ---------- RELATIVE URL FIX ----------
-      if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
-        const base =
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        endpoint = base + (endpoint.startsWith("/") ? endpoint : "/" + endpoint);
-      }
+     // ⛔ If endpoint is NOT a valid URL, throw clean error
+if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+  throw new NonRetriableError(
+    `Invalid URL: "${endpoint}". Please enter a valid absolute URL (starting with http:// or https://).`
+  );
+}
+
 
       // Final absolute URL check
       try {

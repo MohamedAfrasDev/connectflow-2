@@ -34,9 +34,9 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma/enums";
+import Image from "next/image";
 
 
 
@@ -46,43 +46,45 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Variable name is required" })
     .regex(/^[A-Za-z_][A-Za-z0-9_]*$/, {
-      message:
+      message: 
         "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores",
     }),
-    credentialId: z.string().min(1, "Credential is required"),
-    systemPrompt: z.string().optional(),
-  userPrompt: z.string().min(1, "User prompt is required"),
+  username: z.string().optional(),
+  content: z
+  .string()
+  .min(1, "Message content is required")
+  .max(2000, "Discord messages cannot exceed 2000 characters"),
+  webhookUrl: z.string().min(1, "Webhook URL is required"),
 });
 
-export type AnthropicFormValues = z.infer<typeof formSchema>;
+export type DiscordFormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (value: AnthropicFormValues) => void;
-  defaultValues?: Partial<AnthropicFormValues>;
+  onSubmit: (value: DiscordFormValues) => void;
+  defaultValues?: Partial<DiscordFormValues>;
 }
 
-export const AnthropicDialog = ({
+export const DiscordDialog = ({
   open,
   onOpenChange,
   onSubmit,
   defaultValues = {},
 }: Props) => {
 
-  
   const {
 
     data: credentials,
     isLoading: isLoadingCredentials,
-  } = useCredentialsByType(CredentialType.ANTHROPIC);
-  const form = useForm<AnthropicFormValues>({
+  } = useCredentialsByType(CredentialType.GEMINI);
+  const form = useForm<DiscordFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       variableName: defaultValues.variableName || "",
-      systemPrompt: defaultValues.systemPrompt || "",
-      userPrompt: defaultValues.userPrompt || "",
-      credentialId: defaultValues.credentialId || "",
+      username: defaultValues.username || "",
+      content: defaultValues.content || "",
+      webhookUrl: defaultValues.webhookUrl || "",
     },
   });
 
@@ -91,18 +93,18 @@ export const AnthropicDialog = ({
     if (open) {
       form.reset({
         variableName: defaultValues.variableName || "",
-        systemPrompt: defaultValues.systemPrompt || "",
-        userPrompt: defaultValues.userPrompt || "",
-        credentialId: defaultValues.credentialId || "",
+      username: defaultValues.username || "",
+      content: defaultValues.content || "",
+      webhookUrl: defaultValues.webhookUrl || "",
 
       });
     }
   }, [open, defaultValues]);
 
-  const varPreview = form.watch("variableName") || "myAnthropic";
+  const varPreview = form.watch("variableName") || "myDiscord";
 
 
-  const handleSubmit = (values: AnthropicFormValues) => {
+  const handleSubmit = (values: DiscordFormValues) => {
     onSubmit(values);
     onOpenChange(false);
   };
@@ -111,15 +113,15 @@ export const AnthropicDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Anthropic Configuration</DialogTitle>
+          <DialogTitle>Discord Configuration</DialogTitle>
           <DialogDescription>
-            Configure the AI model and prompt for this node.
+            Configure the Discord webhook setting for this node
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-         
+
             {/* VARIABLE NAME */}
             <FormField
               control={form.control}
@@ -128,7 +130,7 @@ export const AnthropicDialog = ({
                 <FormItem>
                   <FormLabel>Variable Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="myAnthropic" {...field} />
+                    <Input placeholder="myDiscord" {...field} />
                   </FormControl>
                   <FormDescription>
                     Use this name to reference the result in other nodes:
@@ -141,50 +143,35 @@ export const AnthropicDialog = ({
               )}
             />
 
-<FormField
+
+            <FormField
               control={form.control}
-              name="credentialId"
+              name="webhookUrl"
               render={({ field }) => <FormItem>
                 <FormLabel>
-                  Anthropic Credential
+                  Webhook URL
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={isLoadingCredentials || !credentials?.length}
-                >
-
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a Credential"/>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {credentials?.map((credential) => (
-                      <SelectItem
-                        key={credential.id}
-                        value={credential.id}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Image src='/logos/anthropic.svg' alt="Anthropic" width={16} height={16} />
-                          {credential.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Input
+                  placeholder="https://discord.com/api/webhooks/..."
+                  {...field}
+                  />
+                </FormControl>
                 <FormMessage />
+                <FormDescription>
+                Get this from Discrod: Channel Settings ⮕ Integrations ⮕ Webhooks
+
+                </FormDescription>
               </FormItem>}
             />
 
 
-
             <FormField
               control={form.control}
-              name="systemPrompt"
+              name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>System Prompt (Optional)</FormLabel>
+                  <FormLabel>Message Content</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="You are a helpful assistant."
@@ -201,28 +188,25 @@ export const AnthropicDialog = ({
                 </FormItem>
               )}
             />
-
-            <FormField
+     <FormField
               control={form.control}
-              name="userPrompt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>User Prompt</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Summarize this Text: {{json httpResponse.data}}"
-                      className="font-mono min-h-[120px]"
-                      rows={6}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Set the behaviour of the assistant. Use {"{{variables}}"} for simple values or {"{{json variables}}"} to stringify objects.
-                  </FormDescription>
+              name="username"
+              render={({ field }) => <FormItem>
+                <FormLabel>
+                  Bot Username (Optional)
+                </FormLabel>
+                <FormControl>
+                  <Input
+                  placeholder="Workflow Bot"
+                  {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+                <FormDescription>
+                Override the webhook's default username
 
-                  <FormMessage />
-                </FormItem>
-              )}
+                </FormDescription>
+              </FormItem>}
             />
 
             <DialogFooter>

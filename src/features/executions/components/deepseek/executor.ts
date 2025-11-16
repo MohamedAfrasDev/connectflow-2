@@ -23,6 +23,7 @@ type DeepSeekData = {
 export const deepSeekExecutor: NodeExecutor<DeepSeekData> = async ({
   data,
   context,
+  userId,
   nodeId,
   step,
   publish,
@@ -56,7 +57,7 @@ export const deepSeekExecutor: NodeExecutor<DeepSeekData> = async ({
       status: "error"
     })
   );
-  throw new NonRetriableError("DeepSeek node: USer prompt is missing")
+  throw new NonRetriableError("DeepSeek node: User prompt is missing")
  }
 
  const systemPrompt = data.systemPrompt
@@ -70,6 +71,7 @@ export const deepSeekExecutor: NodeExecutor<DeepSeekData> = async ({
   return prisma.credential.findUnique({
     where: {
       id: data.credentialId,
+      userId
     },
   });
  });

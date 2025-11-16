@@ -9,6 +9,7 @@ import { openAIExecutor } from "../components/openai/executor";
 import { anthropicExecutor } from "../components/anthropic/executor";
 import { deepSeekExecutor } from "../components/deepseek/executor";
 import { perplexityExecutor } from "../components/perplexity/executor";
+import { discordExecutor } from "../components/discord/executor";
 
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
@@ -23,6 +24,9 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.OPENAI]:openAIExecutor,
     [NodeType.DEEPSEEK]:deepSeekExecutor,
     [NodeType.PERPLEXITY]:perplexityExecutor,
+
+    [NodeType.DISCORD]:discordExecutor,
+    [NodeType.SLACK]:discordExecutor,
 
 
 };

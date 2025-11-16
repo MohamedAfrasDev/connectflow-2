@@ -90,6 +90,12 @@ const executionNodes: NodeTypeOption[] = [
         descritpion: "Use Perplexity to generate text",
         icon: "/logos/perplexity.svg",
     },
+    {
+        type: NodeType.DISCORD,
+        label: "Discord",
+        descritpion: "Send a message to Discord",
+        icon: "/logos/discord.svg",
+    },
 ];
 
 interface NodeSelectorProps {
