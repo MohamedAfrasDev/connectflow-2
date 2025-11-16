@@ -51,22 +51,22 @@ const formSchema = z.object({
   userPrompt: z.string().min(1, "User prompt is required"),
 });
 
-export type GeminiFormValues = z.infer<typeof formSchema>;
+export type OpenAIFormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (value: GeminiFormValues) => void;
-  defaultValues?: Partial<GeminiFormValues>;
+  onSubmit: (value: OpenAIFormValues) => void;
+  defaultValues?: Partial<OpenAIFormValues>;
 }
 
-export const GeminiDialog = ({
+export const OpenAIDialog = ({
   open,
   onOpenChange,
   onSubmit,
   defaultValues = {},
 }: Props) => {
-  const form = useForm<GeminiFormValues>({
+  const form = useForm<OpenAIFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       variableName: defaultValues.variableName || "",
@@ -86,10 +86,10 @@ export const GeminiDialog = ({
     }
   }, [open, defaultValues]);
 
-  const varPreview = form.watch("variableName") || "myGemini";
+  const varPreview = form.watch("variableName") || "myOpenAI";
 
 
-  const handleSubmit = (values: GeminiFormValues) => {
+  const handleSubmit = (values: OpenAIFormValues) => {
     onSubmit(values);
     onOpenChange(false);
   };
@@ -98,7 +98,7 @@ export const GeminiDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gemini Configuration</DialogTitle>
+          <DialogTitle>OpenAI Configuration</DialogTitle>
           <DialogDescription>
             Configure the AI model and prompt for this node.
           </DialogDescription>
@@ -115,7 +115,7 @@ export const GeminiDialog = ({
                 <FormItem>
                   <FormLabel>Variable Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="myGemini" {...field} />
+                    <Input placeholder="myOpenAI" {...field} />
                   </FormControl>
                   <FormDescription>
                     Use this name to reference the result in other nodes:

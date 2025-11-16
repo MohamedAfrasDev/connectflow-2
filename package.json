@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.31",
+    "@ai-sdk/anthropic": "^2.0.23",
+
     "@ai-sdk/openai": "^2.0.65",
     "@hookform/resolvers": "^5.2.2",
     "@inngest/realtime": "^0.4.5",

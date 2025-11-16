@@ -51,22 +51,22 @@ const formSchema = z.object({
   userPrompt: z.string().min(1, "User prompt is required"),
 });
 
-export type GeminiFormValues = z.infer<typeof formSchema>;
+export type AnthropicFormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (value: GeminiFormValues) => void;
-  defaultValues?: Partial<GeminiFormValues>;
+  onSubmit: (value: AnthropicFormValues) => void;
+  defaultValues?: Partial<AnthropicFormValues>;
 }
 
-export const GeminiDialog = ({
+export const AnthropicDialog = ({
   open,
   onOpenChange,
   onSubmit,
   defaultValues = {},
 }: Props) => {
-  const form = useForm<GeminiFormValues>({
+  const form = useForm<AnthropicFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       variableName: defaultValues.variableName || "",
@@ -86,10 +86,10 @@ export const GeminiDialog = ({
     }
   }, [open, defaultValues]);
 
-  const varPreview = form.watch("variableName") || "myGemini";
+  const varPreview = form.watch("variableName") || "myAnthropic";
 
 
-  const handleSubmit = (values: GeminiFormValues) => {
+  const handleSubmit = (values: AnthropicFormValues) => {
     onSubmit(values);
     onOpenChange(false);
   };
@@ -98,7 +98,7 @@ export const GeminiDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gemini Configuration</DialogTitle>
+          <DialogTitle>Anthropic Configuration</DialogTitle>
           <DialogDescription>
             Configure the AI model and prompt for this node.
           </DialogDescription>
@@ -115,7 +115,7 @@ export const GeminiDialog = ({
                 <FormItem>
                   <FormLabel>Variable Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="myGemini" {...field} />
+                    <Input placeholder="myAnthropic" {...field} />
                   </FormControl>
                   <FormDescription>
                     Use this name to reference the result in other nodes:
