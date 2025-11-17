@@ -131,6 +131,7 @@ enum NodeType {
   DISCORD
   SLACK
   GMAIL
+  API
 }
 model Node {
   id String @id @default(cuid())

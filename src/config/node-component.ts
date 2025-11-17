@@ -7,6 +7,7 @@ import { GmailNode } from "@/features/executions/components/gmail/node";
 import { HttpRequestNode } from "@/features/executions/components/http-request/node";
 import { OpenAINode } from "@/features/executions/components/openai/node";
 import { PerlexityNode } from "@/features/executions/components/perplexity/node";
+import { APITriggerNode } from "@/features/triggers/components/api-trigger/node";
 import { GoogleFormTrigger } from "@/features/triggers/components/google-form-trigger/node";
 import { ManualTriggerNode } from "@/features/triggers/components/manual-trigger/node";
 import { StripeTriggerNode } from "@/features/triggers/components/stripe-trigger/node";
@@ -29,6 +30,7 @@ export const nodeComponent = {
    [NodeType.DISCORD]: DiscordNode,
    [NodeType.GMAIL]: GmailNode,
 
+   [NodeType.API]: APITriggerNode,
 
 
 } as const;

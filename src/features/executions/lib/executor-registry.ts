@@ -11,7 +11,7 @@ import { deepSeekExecutor } from "../components/deepseek/executor";
 import { perplexityExecutor } from "../components/perplexity/executor";
 import { discordExecutor } from "../components/discord/executor";
 import { gmailExecutor } from "../components/gmail/executor";
-
+import { apiExecutor } from "@/features/triggers/components/api-trigger/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.MANUAL_TRIGGER]:manualTriggerExecutor,
@@ -30,7 +30,7 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.SLACK]:discordExecutor,
 
     [NodeType.GMAIL]:gmailExecutor,
-
+    [NodeType.API]:apiExecutor,
 };
 
 

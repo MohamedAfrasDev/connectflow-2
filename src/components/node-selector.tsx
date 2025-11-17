@@ -50,6 +50,12 @@ const triggerNodes: NodeTypeOption[] = [
         descritpion: "Runs the flow when a Stripe Event is captured",
         icon: "/logos/stripe.svg"
     },
+    {
+        type: NodeType.API,
+        label: "API",
+        descritpion: "Runs the flow when a Stripe Event is captured",
+        icon: "/logos/stripe.svg"
+    },
 ];
 
 
