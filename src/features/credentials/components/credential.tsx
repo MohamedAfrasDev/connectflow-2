@@ -39,36 +39,39 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /* ---------------- ZOD SCHEMA ---------------- */
-/* ---------------- ZOD SCHEMA ---------------- */
 const formSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
     type: z.enum(CredentialType),
     value: z.string().optional(),
-    // FIX: Allow empty strings so hidden fields don't block validation
-    email: z.union([z.string().email(), z.literal("")]).optional(), 
+    email: z.string().optional(),
     appPassword: z.string().optional(),
+    // SMTP fields
+    smtpHost: z.string().optional(),
+    smtpPort: z.number().optional(),
+    smtpUser: z.string().optional(),
+    smtpPassword: z.string().optional(),
+    secure: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === CredentialType.GMAIL) {
-      // FIX: Explicitly check for valid email logic here since we relaxed the base rule
-      if (!data.email || data.email === "") {
-        ctx.addIssue({ path: ["email"], message: "Email is required for Gmail", code: "custom" });
-      }
-      
+      if (!data.email) ctx.addIssue({ path: ["email"], message: "Email is required for Gmail", code: "custom" });
       if (!data.appPassword || data.appPassword.length < 10) {
-        ctx.addIssue({
-          path: ["appPassword"],
-          message: "App password is required and must be at least 10 characters",
-          code: "custom",
-        });
+        ctx.addIssue({ path: ["appPassword"], message: "App password required (min 10 chars)", code: "custom" });
       }
+    } else if (data.type === CredentialType.CustomMail) {
+      if (!data.smtpHost) ctx.addIssue({ path: ["smtpHost"], message: "SMTP host required", code: "custom" });
+      if (!data.smtpPort) ctx.addIssue({ path: ["smtpPort"], message: "SMTP port required", code: "custom" });
+      if (!data.smtpUser) ctx.addIssue({ path: ["smtpUser"], message: "SMTP username required", code: "custom" });
+      if (!data.smtpPassword) ctx.addIssue({ path: ["smtpPassword"], message: "SMTP password required", code: "custom" });
     } else {
+      // Only API-type credentials
       if (!data.value || data.value.trim().length < 1) {
-        ctx.addIssue({ path: ["value"], message: "API key is required for this type", code: "custom" });
+        ctx.addIssue({ path: ["value"], message: "API key required", code: "custom" });
       }
     }
   });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -80,18 +83,13 @@ const credentialTypeOptions = [
   { value: CredentialType.DEEPSEEK, label: "DeepSeek", logo: "/logos/deepseek.svg" },
   { value: CredentialType.PERPLEXITY, label: "Perplexity", logo: "/logos/perplexity.svg" },
   { value: CredentialType.GMAIL, label: "Gmail", logo: "/logos/gmail.svg" },
+  { value: CredentialType.CustomMail, label: "Custom Mail", logo: "/logos/email.svg" },
+
 ];
 
 /* ---------------- CREDENTIAL FORM ---------------- */
 interface CredentialFormProps {
-  initialData?: {
-    id?: string;
-    name: string;
-    type: CredentialType;
-    value?: string;
-    email?: string;
-    appPassword?: string;
-  };
+  initialData?: Partial<FormValues> & { id?: string }; // Use Partial<FormValues> to accept all fields
 }
 
 export const CredentialForm = ({ initialData }: CredentialFormProps) => {
@@ -103,12 +101,20 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    // --- UPDATED ---
+    // Pass all fields from initialData
+    // AND provide default values for all fields in the schema
     defaultValues: initialData || {
       name: "",
       type: CredentialType.OPENAI,
       value: "",
       email: "",
       appPassword: "",
+      smtpHost: "",
+      smtpPort: 587,
+      smtpUser: "",
+      smtpPassword: "",
+      secure: true,
     },
   });
 
@@ -116,13 +122,37 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const payload =
-        values.type === CredentialType.GMAIL
-          ? { name: values.name, type: values.type, email: values.email, appPassword: values.appPassword }
-          : { name: values.name, type: values.type, value: values.value?.trim() || "" };
+      let payload: any;
+
+      if (values.type === CredentialType.GMAIL) {
+        payload = {
+          name: values.name,
+          type: values.type,
+          email: values.email,
+          appPassword: values.appPassword,
+        };
+      } else if (values.type === CredentialType.CustomMail) {
+        payload = {
+          name: values.name,
+          type: values.type,
+          smtpHost: values.smtpHost,
+          smtpPort: values.smtpPort,
+          smtpUser: values.smtpUser,
+          smtpPassword: values.smtpPassword,
+          secure: values.secure,
+        };
+      } else {
+        payload = {
+          name: values.name,
+          type: values.type,
+          value: values.value?.trim() || "",
+        };
+      }
 
       if (isEdit && initialData?.id) {
         await updateCredential.mutateAsync({ id: initialData.id, ...payload });
+        // Optionally, show a success toast or message here
+        router.push("/credentials"); // Go back to list after update
       } else {
         const result = await createCredential.mutateAsync(payload);
         router.push(`/credentials/${result.id}`);
@@ -145,21 +175,6 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="My API key" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Type */}
               <FormField
                 control={form.control}
@@ -168,7 +183,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                   <FormItem>
                     <FormLabel>Type</FormLabel>
                     <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select value={field.value} onValueChange={field.onChange} disabled={isEdit}>
                         <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
@@ -189,8 +204,23 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                 )}
               />
 
-              {/* API Key */}
-              {selectedType !== CredentialType.GMAIL && (
+              {/* Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="My Personal Key" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* API Key Fields */}
+              {selectedType !== CredentialType.GMAIL && selectedType !== CredentialType.CustomMail && (
                 <FormField
                   control={form.control}
                   name="value"
@@ -198,7 +228,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                     <FormItem>
                       <FormLabel>API Key</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="sk-..." {...field} />
+                        <Input type="password" placeholder="sk-..." {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -206,7 +236,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                 />
               )}
 
-              {/* Gmail */}
+              {/* Gmail Fields */}
               {selectedType === CredentialType.GMAIL && (
                 <>
                   <FormField
@@ -216,7 +246,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                       <FormItem>
                         <FormLabel>Gmail Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="your@gmail.com" {...field} />
+                          <Input placeholder="your@gmail.com" {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -229,7 +259,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                       <FormItem>
                         <FormLabel>App Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="16-digit app password" {...field} />
+                          <Input type="password" placeholder="16-digit app password" {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -237,6 +267,92 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                   />
                 </>
               )}
+
+              {/* CustomMail SMTP Fields */}
+              {selectedType === CredentialType.CustomMail && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="smtpHost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SMTP Host</FormLabel>
+                        <FormControl>
+                          <Input placeholder="smtp.example.com" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="smtpPort"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SMTP Port</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="587"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(Number(e.target.value))} // convert string to number
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="smtpUser"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SMTP Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="user@example.com" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="smtpPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SMTP Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="********" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secure"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Use TLS/SSL</FormLabel>
+                        <FormControl>
+                          <Select value={field.value ? "true" : "false"} onValueChange={v => field.onChange(v === "true")}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Yes</SelectItem>
+                              <SelectItem value="false">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
 
               {/* Actions */}
               <div className="flex gap-4">
@@ -249,8 +365,8 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                       ? "Updating..."
                       : "Update"
                     : createCredential.isPending
-                    ? "Creating..."
-                    : "Create"}
+                      ? "Creating..."
+                      : "Create"}
                 </Button>
                 <Button type="button" variant="outline" asChild>
                   <Link href="/credentials" prefetch>
@@ -276,6 +392,9 @@ export const CredentialView = ({ credentialId }: CredentialViewProps) => {
 
   if (!credential) return <p>Loading...</p>;
 
+  // --- UPDATED ---
+  // We must map ALL fields from the query to the form,
+  // otherwise they will be "undefined" when editing.
   const initialData = {
     id: credential.id,
     name: credential.name,
@@ -283,6 +402,13 @@ export const CredentialView = ({ credentialId }: CredentialViewProps) => {
     value: credential.value ?? "",
     email: credential.email ?? "",
     appPassword: credential.appPassword ?? "",
+    
+    // Pass the SMTP fields to the form
+    smtpHost: credential.smtpHost ?? "",
+    smtpPort: credential.smtpPort ?? 587,
+    smtpUser: credential.smtpUser ?? "",
+    smtpPassword: credential.smtpPassword ?? "",
+    secure: credential.secure ?? true,
   };
 
   return <CredentialForm initialData={initialData} />;

@@ -11,3 +11,27 @@ export async function fetchAPITriggerRealtimeToken() {
     topics: ["status"],              // This must match the defined topic
   });
 }
+
+
+
+
+import { generateAPIKey } from "@/lib/api-key"; // The encryption helper we wrote previously
+import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth-utils";
+
+export const getAPITriggerKey = async (workflowId: string, nodeId: string) => {
+  // 1. Verify User
+  const session = await requireAuth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  // 2. Generate the Encrypted Key
+  const apiKey = generateAPIKey({
+    userId: session.user.id,
+    workflowId: workflowId,
+    triggerNodeId: nodeId,
+  });
+
+  return apiKey;
+};

@@ -53,8 +53,8 @@ const triggerNodes: NodeTypeOption[] = [
     {
         type: NodeType.API,
         label: "API",
-        descritpion: "Runs the flow when a Stripe Event is captured",
-        icon: "/logos/stripe.svg"
+        descritpion: "Runs the flow when a API called",
+        icon: "/logos/api.svg"
     },
 ];
 
@@ -107,6 +107,12 @@ const executionNodes: NodeTypeOption[] = [
         label: "Gmail",
         descritpion: "Send a message to Gmail",
         icon: "/logos/gmail.svg",
+    },
+    {
+        type: NodeType.CUSTOM_MAIL,
+        label: "Custom Mail",
+        descritpion: "Send a message to custom Mail",
+        icon: "/logos/email.svg",
     },
 ];
 

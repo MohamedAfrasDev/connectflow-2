@@ -10,17 +10,25 @@ export const apiExecutor: NodeExecutor<APITriggerData> = async ({
   step,
   publish,
 }) => {
-  // 1. LOADING
-  await publish(apiTriggerChannel().status({ nodeId, status: "loading" }));
+  // 1. Publish LOADING
+  await publish?.(apiTriggerChannel().status({ nodeId, status: "loading" }));
 
-  // 2. LOGIC
+  // 2. Run executor
   const result = await step.run("process-api-payload", async () => {
-    const payload = (context as any).flowInput || {};
-    return { ...context, [data.variableName || "api"]: payload };
+    const api = (context as any).api ?? {};
+    const key = data.variableName || "apiCall";
+
+    // Wrap apiCall inside api
+    return {
+      api: {
+       
+        [key]: api,
+      },
+    };
   });
 
-  // 3. SUCCESS
-  await publish(apiTriggerChannel().status({ nodeId, status: "success" }));
+  // 3. Publish SUCCESS
+  await publish?.(apiTriggerChannel().status({ nodeId, status: "success" }));
 
   return result;
 };

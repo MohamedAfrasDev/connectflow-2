@@ -89,7 +89,12 @@ model Credential {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   email String?       
-  appPassword String?  
+  appPassword String?
+  smtpHost     String?
+  smtpPort     Int?           
+  smtpUser     String?        
+  smtpPassword String?       
+  secure       Boolean?
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -103,6 +108,7 @@ enum CredentialType {
   DEEPSEEK
   PERPLEXITY
   GMAIL
+  CustomMail
  
 }
 
@@ -132,6 +138,7 @@ enum NodeType {
   SLACK
   GMAIL
   API
+  CUSTOM_MAIL
 }
 model Node {
   id String @id @default(cuid())

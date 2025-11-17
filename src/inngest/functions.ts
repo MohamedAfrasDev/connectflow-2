@@ -16,6 +16,7 @@ import { perplexityChannel } from "./channels/perplexity";
 import { discordChannel } from "./channels/discord";
 import { gmailChannel } from "./channels/gmail";
 import { apiTriggerChannel } from "./channels/api-trigger";
+import { customMailChannel } from "./channels/custom_mail";
 
 
 
@@ -39,6 +40,7 @@ export const executeWorkflow = inngest.createFunction(
       discordChannel(),
       gmailChannel(),
       apiTriggerChannel(),
+      customMailChannel(),
     ]
   },
   async ({ event, step, publish }) => {
@@ -73,23 +75,28 @@ export const executeWorkflow = inngest.createFunction(
     });
 
 
-    let context = event.data.initialData || {};
+// FIX: support both initialData and api and preserve all event data
+// Build ONLY real context, without polluting it with event-level fields
+// FIX: support both initialData and api properly
+let context: Record<string, any> = {
+  ...(event.data.initialData ?? {}),
+};
 
-    for (const node of sortedNodes) {
-      const executor = getExecutor(node.type as NodeType);
-      context = await executor({
-        data: node.data as Record<string, unknown>,
-        nodeId: node.id,
-        userId,
-        context,
-        step,
-        publish,
-      })
-    }
+if (event.data.api && Object.keys(event.data.api).length) {
+  context.api = event.data.api;
+}
 
-    return {
-      workflowId,
-      result: context,
-    };
+for (const node of sortedNodes) {
+  const executor = getExecutor(node.type as NodeType);
+  context = await executor({
+    data: node.data as Record<string, unknown>,
+    nodeId: node.id,
+    userId,
+    context,
+    step,
+    publish,
+  });
+}
+
   }
 );

@@ -1,6 +1,7 @@
+// /features/triggers/api-trigger.ts
 import { inngest } from "@/inngest/client";
 
-type APITriggerData = {
+export type APITriggerData = {
   userId: string;
   action: string;
   payload?: Record<string, unknown>;
@@ -12,27 +13,21 @@ export async function triggerAPIWorkflow(data: APITriggerData) {
   const nodeId = `node-${Date.now()}`;
 
   try {
-    // ⚠️ FIX: Send directly to "workflow/execute.workflow"
-    // This prevents the "2 functions" issue.
     const result = await inngest.send({
-      name: "workflow/execute.workflow", 
-      data: { 
+      name: "workflow/execute.workflow", // workflow trigger name
+      data: {
         userId: data.userId,
-        nodeId: nodeId,
-        
-        // Pass IDs so the engine can load DB and update UI
+        action: data.action,
+        nodeId,
         workflowId: data.workflowId,
-        triggerNodeId: data.triggerNodeId,
-
-        // Pass payload as flowInput so apiExecutor can grab it
-        flowInput: data.payload, 
+        api: data.payload, // <-- pass payload here
       },
     });
 
-    console.log("Event sent:", result);
+    console.log("Event sent to Inngest:", result);
     return result;
   } catch (err: any) {
-    console.error("Trigger failed:", err);
+    console.error("Failed to trigger workflow:", err);
     throw err;
   }
 }

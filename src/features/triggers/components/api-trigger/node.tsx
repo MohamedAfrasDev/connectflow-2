@@ -4,7 +4,7 @@
 import { NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseTriggerNode } from "../base-trigger-node";
-import { ManualTriggerDialog } from "./dialog";
+import { APITriggerDialog } from "./dialog";
 import { useNodeStatus } from "@/features/executions/hooks/use-node-status";
 import { API_TRIGGER_CHANNEL_NAME } from "@/inngest/channels/api-trigger";
 import { fetchAPITriggerRealtimeToken } from "./action";
@@ -25,7 +25,7 @@ export const APITriggerNode = memo((props: NodeProps) => {
 
   return (
     <>
-      <ManualTriggerDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <APITriggerDialog open={dialogOpen} onOpenChange={setDialogOpen} nodeId={props.id} />
       <BaseTriggerNode
         {...props}
         icon="/logos/api.svg"
