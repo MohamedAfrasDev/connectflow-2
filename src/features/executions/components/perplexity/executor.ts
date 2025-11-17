@@ -81,7 +81,7 @@ export const perplexityExecutor: NodeExecutor<PerplexityData> = async ({
  }
 
  const perplexity = createPerplexity({
-  apiKey: credential.value
+  apiKey: credential.value ?? undefined
  });
 
 

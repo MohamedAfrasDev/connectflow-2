@@ -83,7 +83,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
 
  
  const openai = createOpenAI({
-  apiKey: credential.value
+  apiKey: credential.value ?? undefined
  });
 
 

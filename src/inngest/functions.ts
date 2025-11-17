@@ -14,6 +14,7 @@ import { anthropicChannel } from "./channels/anthropic";
 import { deepSeekChannel } from "./channels/deepseek";
 import { perplexityChannel } from "./channels/perplexity";
 import { discordChannel } from "./channels/discord";
+import { gmailChannel } from "./channels/gmail";
 
 
 
@@ -35,6 +36,7 @@ export const executeWorkflow = inngest.createFunction(
       deepSeekChannel(),
       perplexityChannel(),
       discordChannel(),
+      gmailChannel(),
     ]
   },
   async ({ event, step, publish }) => {

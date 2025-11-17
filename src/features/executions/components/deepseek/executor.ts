@@ -82,7 +82,7 @@ export const deepSeekExecutor: NodeExecutor<DeepSeekData> = async ({
 
  
  const deepseek = createDeepSeek({
-  apiKey: credential.value
+  apiKey: credential.value ?? undefined
  });
 
 

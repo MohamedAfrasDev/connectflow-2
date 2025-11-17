@@ -4,30 +4,61 @@ import { CredentialType } from "@/generated/prisma/enums";
 import prisma from "@/lib/db";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 import { generateSlug } from "random-word-slugs";
-import z from "zod";
+import z, { email } from "zod";
 
 
 export const credentialsRouter = createTRPCRouter({
 
     create: premiumProcedure
-        .input(
-            z.object({
-                name: z.string().min(1, "Name is required"),
-                type: z.enum(CredentialType),
-                value: z.string().min(1, "Value is required")
-            })
-        )
-        .mutation(({ ctx, input }) => {
-            const { name, value, type } = input;
-            return prisma.credential.create({
-                data: {
-                    name: name,
-                    userId: ctx.auth.user.id,
-                    type,
-                    value, // TODO ENC FOR PRODUCTION
-                }
-            })
-        }),
+    .input(
+      z.object({
+        name: z.string().min(1, "Name is required"),
+        type: z.enum(CredentialType),
+        value: z.string().optional(), // optional
+        email: z.string().optional(),
+        appPassword: z.string().optional(),
+      })
+      .superRefine((data, ctx) => {
+        if (data.type === CredentialType.GMAIL) {
+          if (!data.email) {
+            ctx.addIssue({
+              path: ["email"],
+              message: "Email is required for Gmail",
+              code: "custom",
+            });
+          }
+          if (!data.appPassword || data.appPassword.length < 10) {
+            ctx.addIssue({
+              path: ["appPassword"],
+              message: "App password is required and must be at least 10 characters",
+              code: "custom",
+            });
+          }
+        } else {
+          if (!data.value || data.value.length < 1) {
+            ctx.addIssue({
+              path: ["value"],
+              message: "API key is required",
+              code: "custom",
+            });
+          }
+        }
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      return prisma.credential.create({
+        data: {
+          name: input.name,
+          userId: ctx.auth.user.id,
+          type: input.type,
+          value: input.value ?? null,           // only required for non-Gmail
+          email: input.email ?? null,           // only for Gmail
+          appPassword: input.appPassword ?? null,
+        },
+      });
+    }),
+  
+  
     remove: protectedProcedure
         .input(z.object({ id: z.string() }))
         .mutation(({ ctx, input }) => {
@@ -48,7 +79,9 @@ export const credentialsRouter = createTRPCRouter({
                 id: z.string(),
                 name: z.string().min(1, "Name is required"),
                 type: z.enum(CredentialType),
-                value: z.string().min(1, "Value is required"),
+                value: z.string().min(1, "Value is required").optional(),
+                email: z.string().email().optional(),
+                appPassword: z.string().optional(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -91,6 +124,8 @@ export const credentialsRouter = createTRPCRouter({
                     createdAt: true,
                     updatedAt: true,
                     value: true,
+                    appPassword: true,
+                    email: true
                 }
             });
 

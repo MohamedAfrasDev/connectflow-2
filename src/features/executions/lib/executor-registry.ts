@@ -10,6 +10,7 @@ import { anthropicExecutor } from "../components/anthropic/executor";
 import { deepSeekExecutor } from "../components/deepseek/executor";
 import { perplexityExecutor } from "../components/perplexity/executor";
 import { discordExecutor } from "../components/discord/executor";
+import { gmailExecutor } from "../components/gmail/executor";
 
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
@@ -28,6 +29,7 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.DISCORD]:discordExecutor,
     [NodeType.SLACK]:discordExecutor,
 
+    [NodeType.GMAIL]:gmailExecutor,
 
 };
 

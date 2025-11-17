@@ -96,6 +96,12 @@ const executionNodes: NodeTypeOption[] = [
         descritpion: "Send a message to Discord",
         icon: "/logos/discord.svg",
     },
+    {
+        type: NodeType.GMAIL,
+        label: "Gmail",
+        descritpion: "Send a message to Gmail",
+        icon: "/logos/gmail.svg",
+    },
 ];
 
 interface NodeSelectorProps {

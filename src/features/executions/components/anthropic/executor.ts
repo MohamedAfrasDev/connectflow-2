@@ -82,7 +82,7 @@ export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({
  }
 
  const anthropic = createAnthropic({
-  apiKey: credential.value
+  apiKey: credential.value ?? undefined
  });
 
 

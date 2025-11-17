@@ -82,7 +82,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
  
 
  const google = createGoogleGenerativeAI({
-  apiKey: credential.value
+  apiKey: credential.value ?? undefined
  });
 
 
