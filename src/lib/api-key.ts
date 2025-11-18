@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 // 1. Get your raw secret from env (can be any length string now)
-const RAW_SECRET = process.env.API_SECRET_KEY || 'my-fallback-secret-key'; 
+const RAW_SECRET = process.env.API_SECRET_KEY || 'afras4432'; 
 
 // 2. ⚠️ FIX: Hash the key to ensure it is EXACTLY 32 bytes (256 bits)
 // This prevents the "Invalid key length" crash forever.

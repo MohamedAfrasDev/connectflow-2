@@ -10,7 +10,9 @@
     "ngrok:dev": "dotenv ngrok http --url=$NGROK_URL 80",
     "format": "biome format --write",
     "inngest:dev": "inngest-cli dev",
-    "dev:all": "mprocs"
+    "dev:all": "mprocs",
+    "postinstall": "prisma generate --binary-targets native,rhel-openssl-3.0.x"
+
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.23",
