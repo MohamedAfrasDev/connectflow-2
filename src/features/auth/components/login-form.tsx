@@ -50,6 +50,31 @@ export function LoginForm() {
         },
     });
 
+
+    const signInGitHub = async () => {
+        const data = await authClient.signIn.social({
+            provider: "github",
+        }, {
+            onSuccess: () => {
+                router.push("/");
+            },
+            onError: () => {
+                toast.error("Something went wrong");
+            }
+        })
+    }
+    const signInGoogle = async () => {
+        const data = await authClient.signIn.social({
+            provider: "google",
+        }, {
+            onSuccess: () => {
+                router.push("/");
+            },
+            onError: () => {
+                toast.error("Something went wrong");
+            }
+        })
+    }
     const onSubmit = async (values: LoginFormValues) => {
         await authClient.signIn.email({
             email: values.email,
@@ -64,6 +89,7 @@ export function LoginForm() {
             }
         })
     };
+    
 
     const isPending = form.formState.isSubmitting;
 
@@ -85,6 +111,7 @@ export function LoginForm() {
                                         <Button
                                             variant="outline"
                                             className="w-full"
+                                            onClick={signInGitHub}
                                             type="button"
                                             disabled={isPending}
                                         >
@@ -96,6 +123,7 @@ export function LoginForm() {
                                             variant="outline"
                                             className="w-full"
                                             type="button"
+                                            onClick={signInGoogle}
                                             disabled={isPending}
                                         >
                                             <Image src="/logos/google.svg" width={20} height={20} alt="Google" />

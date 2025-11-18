@@ -12,7 +12,6 @@ const IV_LENGTH = 16; // AES block size is always 16
 type KeyPayload = {
   userId: string;
   workflowId: string;
-  triggerNodeId: string;
 };
 
 export function generateAPIKey(payload: KeyPayload): string {

@@ -15,6 +15,16 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: true,
     },
+    socialProviders: {
+        github: {
+            clientId: process.env.GITHUB_CLIENT_ID as string,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET as string
+        },
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+        },
+    },
     plugins: [
         polar({
             client: polarClient,
@@ -22,7 +32,7 @@ export const auth = betterAuth({
             use: [
                 portal({
                     // You can use the same URL or a different one (e.g., /settings)
-                    returnUrl: process.env.POLAR_SUCCESS_URL, 
+                    returnUrl: process.env.POLAR_SUCCESS_URL,
                 }),
                 checkout({
                     products: [

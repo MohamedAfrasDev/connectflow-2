@@ -173,7 +173,7 @@ export const CustomMailDialog = ({
                                 <SelectItem key={cred.id} value={cred.id}>
                                   <div className="flex items-center gap-2">
                                     <Image
-                                      src="/logos/CustomMail.svg"
+                                      src="/logos/email.svg"
                                       alt="CustomMail"
                                       width={16}
                                       height={16}

@@ -12,7 +12,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,25 +35,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma/enums";
-import Image from "next/image";
 
-
-
-
+// LUMA IMAGE-ONLY SCHEMA
 const formSchema = z.object({
   variableName: z
     .string()
-    .min(1, { message: "Variable name is required" })
+    .min(1, "Variable name is required")
     .regex(/^[A-Za-z_][A-Za-z0-9_]*$/, {
-      message: 
-        "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores",
+      message: "Variable name must start with a letter or underscore",
     }),
-  username: z.string().optional(),
-  content: z
-  .string()
-  .min(1, "Message content is required")
-  .max(2000, "Luma messages cannot exceed 2000 characters"),
-  webhookUrl: z.string().min(1, "Webhook URL is required"),
+  apiCredentialId: z.string().optional(),
+  imagePrompt: z.string().min(1, "Image prompt is required"),
+  imageCount: z.string().optional(),
+  imageSize: z.string().optional(),
 });
 
 export type LumaFormValues = z.infer<typeof formSchema>;
@@ -66,43 +59,33 @@ interface Props {
   defaultValues?: Partial<LumaFormValues>;
 }
 
-export const LumaDialog = ({
-  open,
-  onOpenChange,
-  onSubmit,
-  defaultValues = {},
-}: Props) => {
+export const LumaDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: Props) => {
+  const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.LUMA);
 
-  const {
-
-    data: credentials,
-    isLoading: isLoadingCredentials,
-  } = useCredentialsByType(CredentialType.GEMINI);
   const form = useForm<LumaFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       variableName: defaultValues.variableName || "",
-      username: defaultValues.username || "",
-      content: defaultValues.content || "",
-      webhookUrl: defaultValues.webhookUrl || "",
+      apiCredentialId: defaultValues.apiCredentialId || "",
+      imagePrompt: defaultValues.imagePrompt || "",
+      imageCount: defaultValues.imageCount || "1",
+      imageSize: defaultValues.imageSize || "1024x1024",
     },
   });
 
-  // Reset when dialog opens (edit mode)
   useEffect(() => {
     if (open) {
       form.reset({
         variableName: defaultValues.variableName || "",
-      username: defaultValues.username || "",
-      content: defaultValues.content || "",
-      webhookUrl: defaultValues.webhookUrl || "",
-
+        apiCredentialId: defaultValues.apiCredentialId || "",
+        imagePrompt: defaultValues.imagePrompt || "",
+        imageCount: defaultValues.imageCount || "1",
+        imageSize: defaultValues.imageSize || "1024x1024",
       });
     }
   }, [open, defaultValues]);
 
   const varPreview = form.watch("variableName") || "myLuma";
-
 
   const handleSubmit = (values: LumaFormValues) => {
     onSubmit(values);
@@ -113,15 +96,14 @@ export const LumaDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Luma Configuration</DialogTitle>
+          <DialogTitle>Luma Image Generation</DialogTitle>
           <DialogDescription>
-            Configure the Luma webhook setting for this node
+            Configure image generation settings for Luma.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-
             {/* VARIABLE NAME */}
             <FormField
               control={form.control}
@@ -132,87 +114,74 @@ export const LumaDialog = ({
                   <FormControl>
                     <Input placeholder="myLuma" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Use this name to reference the result in other nodes:
-                    <span className="font-mono ml-1 text-sm text-primary">
-                      {`{{${varPreview}.text}}`}
-                    </span>
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-
+            {/* LUMA API CREDENTIAL */}
             <FormField
               control={form.control}
-              name="webhookUrl"
-              render={({ field }) => <FormItem>
-                <FormLabel>
-                  Webhook URL
-                </FormLabel>
-                <FormControl>
-                  <Input
-                  placeholder="https://Luma.com/api/webhooks/..."
-                  {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-                <FormDescription>
-                Get this from Discrod: Channel Settings ⮕ Integrations ⮕ Webhooks
-
-                </FormDescription>
-              </FormItem>}
-            />
-
-
-            <FormField
-              control={form.control}
-              name="content"
+              name="apiCredentialId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Message Content</FormLabel>
+                  <FormLabel>Luma API Credential</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="You are a helpful assistant."
-                      className="font-mono min-h-[80px]"
-                      rows={6}
-                      {...field}
-                    />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoadingCredentials || !credentials?.length}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a Credential" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {credentials?.map((cred) => (
+                          <SelectItem key={cred.id} value={cred.id}>
+                            {cred.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
-                  <FormDescription>
-                    Set the behaviour of the assistant. Use {"{{variables}}"} for simple values or {"{{json variables}}"} to stringify objects.
-                  </FormDescription>
-
                   <FormMessage />
                 </FormItem>
               )}
             />
-     <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => <FormItem>
-                <FormLabel>
-                  Bot Username (Optional)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                  placeholder="Workflow Bot"
-                  {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-                <FormDescription>
-                Override the webhook's default username
 
-                </FormDescription>
-              </FormItem>}
+            {/* IMAGE PROMPT */}
+            <FormField
+              control={form.control}
+              name="imagePrompt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image Prompt</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="A cinematic landscape with neon lights..." rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+           
+            {/* IMAGE SIZE */}
+            <FormField
+              control={form.control}
+              name="imageSize"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image Size</FormLabel>
+                  <FormControl>
+                    <Input placeholder="1024x1024" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <DialogFooter>
-              <Button type="submit" className="w-full">
-                Save
-              </Button>
+              <Button type="submit" className="w-full">Save</Button>
             </DialogFooter>
           </form>
         </Form>
