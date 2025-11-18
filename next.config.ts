@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
     }
     return config;
 },
+outputFileTracingIncludes: {
+  '/api/**/*': ['./node_modules/.prisma/client/**/*'],
+  '/*': ['./node_modules/.prisma/client/**/*'],
+},
   async redirects() {
     return[
       {
