@@ -1,6 +1,6 @@
 
 "use client";
-import { ExecutionStatus } from "@/generated/prisma/";
+import { ExecutionStatus } from "@/generated/prisma/enums";
 import { CheckCircle2Icon, XCircleIcon, Loader2Icon, ClockIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useSuspenseExecution } from "../hooks/use-execution";

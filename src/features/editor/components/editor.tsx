@@ -8,7 +8,7 @@ import { nodeComponent } from '@/config/node-component';
 import { AddNodeButton } from './add-node-button';
 import { useSetAtom } from 'jotai';
 import { editorAtom } from '../store/atoms';
-import { NodeType } from '@/generated/prisma/';
+import { NodeType } from '@/generated/prisma/enums';
 import { ExecuteWorkflowButton } from './execute-workflow-button';
 
 

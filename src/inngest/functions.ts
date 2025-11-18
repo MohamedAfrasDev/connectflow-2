@@ -2,7 +2,7 @@ import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
 import prisma from "@/lib/db";
 import { topologicalSort } from "./utils";
-import { ExecutionStatus, NodeType } from "@/generated/prisma/";
+import { ExecutionStatus, NodeType } from "@/generated/prisma/enums";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
 import { httpRequestChannel } from "./channels/http-request";
 import { manualTriggerChannel } from "./channels/manual-trigger";
@@ -20,22 +20,22 @@ import { customMailChannel } from "./channels/custom_mail";
 import { instagramChannel } from "./channels/instagram";
 import { lumaChannel } from "./channels/luma";
 
-
-
 export const executeWorkflow = inngest.createFunction(
   {
     id: "execute-workflow",
     retries: process.env.NODE_ENV === "production" ? 3 : 0,
     onFailure: async ({ event, step }) => {
+      // Ensure we catch failures and mark execution as FAILED
+      if (!event?.data?.event?.id) return;
       return prisma.execution.update({
         where: { inngestEventId: event.data.event.id },
         data: {
           status: ExecutionStatus.FAILED,
-          error: event.data.error.message,
-          errorStack: event.data.error.stack
-        }
-      })
-    }
+          error: event.data.error?.message ?? "Unknown error",
+          errorStack: event.data.error?.stack ?? "",
+        },
+      });
+    },
   },
   {
     event: "workflow/execute.workflow",
@@ -55,22 +55,21 @@ export const executeWorkflow = inngest.createFunction(
       customMailChannel(),
       instagramChannel(),
       lumaChannel(),
-    ]
+    ],
   },
   async ({ event, step, publish }) => {
     const inngestEventId = event.id;
     const workflowId = event.data.workflowId;
 
-
     if (!inngestEventId) {
       throw new NonRetriableError("Inngest ID is missing");
     }
 
-
-    if (!inngestEventId || !workflowId) {
+    if (!workflowId) {
       throw new NonRetriableError("Workflow ID is missing");
     }
 
+    // 1️⃣ Create execution record
     await step.run("create-execution", async () => {
       return prisma.execution.create({
         data: {
@@ -80,42 +79,35 @@ export const executeWorkflow = inngest.createFunction(
       });
     });
 
+    // 2️⃣ Prepare workflow nodes sorted topologically
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflow.findUniqueOrThrow({
         where: { id: workflowId },
         include: {
           nodes: true,
-          connections: true
-        }
+          connections: true,
+        },
       });
 
-      return topologicalSort(workflow.nodes, workflow.connections)
-
+      return topologicalSort(workflow.nodes, workflow.connections);
     });
 
+    // 3️⃣ Find userId for workflow
     const userId = await step.run("find-user-id", async () => {
       const workflow = await prisma.workflow.findUniqueOrThrow({
         where: { id: workflowId },
-        select: {
-          userId: true,
-        }
+        select: { userId: true },
       });
-
       return workflow.userId;
     });
 
-
-    // FIX: support both initialData and api and preserve all event data
-    // Build ONLY real context, without polluting it with event-level fields
-    // FIX: support both initialData and api properly
-    let context: Record<string, any> = {
-      ...(event.data.initialData ?? {}),
-    };
-
+    // 4️⃣ Build execution context
+    let context: Record<string, any> = { ...(event.data.initialData ?? {}) };
     if (event.data.api && Object.keys(event.data.api).length) {
       context.api = event.data.api;
     }
 
+    // 5️⃣ Execute each node
     for (const node of sortedNodes) {
       const executor = getExecutor(node.type as NodeType);
       context = await executor({
@@ -128,7 +120,7 @@ export const executeWorkflow = inngest.createFunction(
       });
     }
 
-
+    // 6️⃣ Update execution status
     await step.run("update-execution", async () => {
       return prisma.execution.update({
         where: { inngestEventId, workflowId },
@@ -136,8 +128,8 @@ export const executeWorkflow = inngest.createFunction(
           status: ExecutionStatus.SUCCESS,
           completedAt: new Date(),
           output: context,
-        }
-      })
-    })
+        },
+      });
+    });
   }
 );
