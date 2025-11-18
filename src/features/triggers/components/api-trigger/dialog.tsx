@@ -103,6 +103,12 @@ export const APITriggerDialog = ({ open, onOpenChange, nodeId }: Props) => {
                 This key authenticates your request and identifies this specific workflow node.
               </p>
             </div>
+          <div>
+          Use this name to reference the result in other nodes:
+                    <span className="font-mono ml-1 text-sm text-primary">
+                      {`{{api.apiCall.email}}`}
+                    </span>
+          </div>
           </TabsContent>
 
           {/* --- TAB 2: cURL CODE --- */}

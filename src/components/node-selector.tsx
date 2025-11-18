@@ -120,12 +120,7 @@ const executionNodes: NodeTypeOption[] = [
         descritpion: "Publish a post to Instagram",
         icon: "/logos/instagram.svg",
     },
-    {
-        type: NodeType.LUMA,
-        label: "Luma",
-        descritpion: "Generate Image",
-        icon: "/logos/luma.svg",
-    },
+ 
 ];
 
 interface NodeSelectorProps {
