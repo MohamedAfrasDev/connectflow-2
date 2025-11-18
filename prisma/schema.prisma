@@ -95,6 +95,7 @@ model Credential {
   smtpUser     String?        
   smtpPassword String?       
   secure       Boolean?
+  instagramBusinessId String?
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -109,7 +110,8 @@ enum CredentialType {
   PERPLEXITY
   GMAIL
   CustomMail
- 
+  INSTAGRAM
+  LUMA
 }
 
 model Workflow {
@@ -139,6 +141,8 @@ enum NodeType {
   GMAIL
   API
   CUSTOM_MAIL
+  INSTAGRAM
+  LUMA
 }
 model Node {
   id String @id @default(cuid())

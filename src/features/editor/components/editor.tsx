@@ -53,6 +53,9 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
      <ReactFlow
         nodes={nodes}
         edges={edges}
+        proOptions={{
+          hideAttribution: true
+        }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -64,8 +67,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         
 
         zoomOnScroll
-        
-        panOnDrag={false}
+      
         selectionOnDrag
        
       /> 

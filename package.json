@@ -16,6 +16,7 @@
     "@ai-sdk/anthropic": "^2.0.23",
     "@ai-sdk/deepseek": "^1.0.28",
     "@ai-sdk/google": "^2.0.31",
+    "@ai-sdk/luma": "^1.0.18",
     "@ai-sdk/openai": "^2.0.65",
     "@ai-sdk/perplexity": "^2.0.19",
     "@hookform/resolvers": "^5.2.2",

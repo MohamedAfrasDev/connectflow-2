@@ -110,9 +110,21 @@ const executionNodes: NodeTypeOption[] = [
     },
     {
         type: NodeType.CUSTOM_MAIL,
-        label: "Custom Mail",
-        descritpion: "Send a message to custom Mail",
+        label: "SMTP (Custom Mail)",
+        descritpion: "Send a message using SMTP",
         icon: "/logos/email.svg",
+    },
+    {
+        type: NodeType.INSTAGRAM,
+        label: "Instagram",
+        descritpion: "Publish a post to Instagram",
+        icon: "/logos/instagram.svg",
+    },
+    {
+        type: NodeType.LUMA,
+        label: "Luma",
+        descritpion: "Generate Image",
+        icon: "/logos/luma.svg",
     },
 ];
 

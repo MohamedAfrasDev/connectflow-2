@@ -14,7 +14,7 @@ BaseNodeProps>(({className,status, ...props}, ref) => (
     <div
     ref={ref}
       className={cn(
-      "relative rounded-sm border border-muted-foreground bg-card text-card-foreground hover:bg-accent",
+      "relative rounded-sm border border-muted-foreground bg-white text-card-foreground hover:bg-accent",
         className,
       )}
       tabIndex={0}

@@ -1,41 +1,36 @@
+// node.tsx
 "use client";
 
 import { Node, NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";
+import { InstagramDialog, InstagramFormValues } from "./dialog";
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { GMAIL_CHANNEL_NAME } from "@/inngest/channels/gmail";
-import { fetchCustomMailRealtimeToken } from "./action";
-import { CUSTOM_MAIL_CHANNEL_NAME } from "@/inngest/channels/custom_mail";
-import { CustomMailDialog, CustomMailFormValues } from "./dialog";
+import { fetchInstagramRealtimeToken } from "./action";
+import { INSTAGRAM_CHANNEL_NAME } from "@/inngest/channels/instagram";
 
-type CustomMailNodeData = {
-  variableName?: string;
+type InstagramNodeData = {
   credentialId?: string;
-  to?: string;
-  subject?: string;
-  body?: string;
+  variableName?: string;
+  caption?: string;
+  imageUrl?: string;
+  publishType?: "IMAGE" | "VIDEO";
 };
 
-type CustomMailNodeType = Node<CustomMailNodeData>;
+type InstagramNodeType = Node<InstagramNodeData>;
 
-interface Props extends NodeProps<CustomMailNodeType> {
-  credentials: { id: string; name: string }[];
-}
-
-export const CustomMailNode = memo(({ credentials, ...props }: Props) => {
+export const InstagramNode = memo((props: NodeProps<InstagramNodeType>) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const nodeStatus = useNodeStatus({
     nodeId: props.id,
-    channel: CUSTOM_MAIL_CHANNEL_NAME,
+    channel: INSTAGRAM_CHANNEL_NAME,
     topic: "status",
-    refreshToken: fetchCustomMailRealtimeToken,
+    refreshToken: fetchInstagramRealtimeToken,
   });
 
   const { setNodes } = useReactFlow();
 
-  const handleSubmit = (values: CustomMailFormValues) => {
+  const handleSubmit = (values: InstagramFormValues) => {
     setNodes((nodes) =>
       nodes.map((node) => {
         if (node.id === props.id) {
@@ -45,9 +40,9 @@ export const CustomMailNode = memo(({ credentials, ...props }: Props) => {
               ...node.data,
               variableName: values.variableName,
               credentialId: values.credentialId,
-              to: values.to,
-              subject: values.subject,
-              body: values.body,
+              caption: values.caption,
+              imageUrl: values.imageUrl,
+              publishType: values.publishType || "IMAGE",
             },
           };
         }
@@ -57,26 +52,22 @@ export const CustomMailNode = memo(({ credentials, ...props }: Props) => {
   };
 
   const handleOpenSettings = () => setDialogOpen(true);
-
   const nodeData = props.data;
-  const description = nodeData?.to
-    ? `Sending to: ${nodeData.to}`
-    : "Not configured";
+  const description = nodeData?.caption ? `Caption: ${nodeData.caption.slice(0, 50)}...` : "Not configured";
 
   return (
     <>
-      <CustomMailDialog
+      <InstagramDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSubmit={handleSubmit}
         defaultValues={nodeData}
       />
-
       <BaseExecutionNode
         {...props}
         id={props.id}
-        icon="/logos/email.svg"
-        name="SMTP"
+        icon="/logos/instagram.svg"
+        name="Instagram (Business)"
         status={nodeStatus}
         description={description}
         onSettings={handleOpenSettings}
@@ -86,4 +77,4 @@ export const CustomMailNode = memo(({ credentials, ...props }: Props) => {
   );
 });
 
-CustomMailNode.displayName = "CustomMailNode";
+InstagramNode.displayName = "InstagramNode";

@@ -52,6 +52,7 @@ const formSchema = z
     smtpUser: z.string().optional(),
     smtpPassword: z.string().optional(),
     secure: z.boolean().optional(),
+    instagramBusinessId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === CredentialType.GMAIL) {
@@ -70,6 +71,10 @@ const formSchema = z
         ctx.addIssue({ path: ["value"], message: "API key required", code: "custom" });
       }
     }
+    if (data.type === CredentialType.INSTAGRAM) {
+      if (!data.value) ctx.addIssue({ path: ["value"], message: "Access token is required for Instagram", code: "custom" });
+      if (!data.instagramBusinessId) ctx.addIssue({ path: ["instagramBusinessId"], message: "Instagram Business ID is required", code: "custom" });
+    }
   });
 
 
@@ -84,6 +89,7 @@ const credentialTypeOptions = [
   { value: CredentialType.PERPLEXITY, label: "Perplexity", logo: "/logos/perplexity.svg" },
   { value: CredentialType.GMAIL, label: "Gmail", logo: "/logos/gmail.svg" },
   { value: CredentialType.CustomMail, label: "Custom Mail", logo: "/logos/email.svg" },
+  { value: CredentialType.INSTAGRAM, label: "Instagram (Business)", logo: "/logos/instagram.svg" },
 
 ];
 
@@ -115,6 +121,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
       smtpUser: "",
       smtpPassword: "",
       secure: true,
+      instagramBusinessId: "",
     },
   });
 
@@ -141,13 +148,24 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
           smtpPassword: values.smtpPassword,
           secure: values.secure,
         };
-      } else {
+      }else if (values.type === CredentialType.INSTAGRAM) {
+        payload = {
+          name: values.name,
+          type: values.type,
+          value: JSON.stringify({
+            accessToken: values.value?.trim() || "",
+            instagramBusinessId: values.instagramBusinessId?.trim() || "",
+          }),
+        };
+      }
+       else {
         payload = {
           name: values.name,
           type: values.type,
           value: values.value?.trim() || "",
         };
       }
+
 
       if (isEdit && initialData?.id) {
         await updateCredential.mutateAsync({ id: initialData.id, ...payload });
@@ -176,6 +194,7 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Type */}
+           
               <FormField
                 control={form.control}
                 name="type"
@@ -218,9 +237,39 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                   </FormItem>
                 )}
               />
+   {selectedType === CredentialType.INSTAGRAM && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Access Token</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Enter long-lived access token" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="instagramBusinessId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Instagram Business ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter Instagram Business Account ID" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
               {/* API Key Fields */}
-              {selectedType !== CredentialType.GMAIL && selectedType !== CredentialType.CustomMail && (
+              {selectedType !== CredentialType.GMAIL && selectedType !== CredentialType.CustomMail && selectedType !== CredentialType.INSTAGRAM && (
                 <FormField
                   control={form.control}
                   name="value"
@@ -399,16 +448,21 @@ export const CredentialView = ({ credentialId }: CredentialViewProps) => {
     id: credential.id,
     name: credential.name,
     type: credential.type,
-    value: credential.value ?? "",
     email: credential.email ?? "",
     appPassword: credential.appPassword ?? "",
-    
+
     // Pass the SMTP fields to the form
     smtpHost: credential.smtpHost ?? "",
     smtpPort: credential.smtpPort ?? 587,
     smtpUser: credential.smtpUser ?? "",
     smtpPassword: credential.smtpPassword ?? "",
     secure: credential.secure ?? true,
+    value: credential.type === CredentialType.INSTAGRAM && credential.value
+    ? JSON.parse(credential.value).accessToken
+    : credential.value ?? "",
+  instagramBusinessId: credential.type === CredentialType.INSTAGRAM && credential.value
+    ? JSON.parse(credential.value).instagramBusinessId
+    : "",
   };
 
   return <CredentialForm initialData={initialData} />;

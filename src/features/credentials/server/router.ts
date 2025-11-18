@@ -28,6 +28,7 @@ export const credentialsRouter = createTRPCRouter({
         smtpUser: z.string().optional(),
         smtpPassword: z.string().optional(),
         secure: z.boolean().optional(),
+        instagramBusinessId: z.string().optional(),
       })
       .superRefine((data, ctx) => {
         // --- UPDATED ---: Logic to handle all 3 credential types
@@ -60,6 +61,10 @@ export const credentialsRouter = createTRPCRouter({
           if (!data.smtpPassword) {
             ctx.addIssue({ path: ["smtpPassword"], message: "SMTP password required", code: "custom" });
           }
+          if (!data.instagramBusinessId) {
+            if (!data.value) ctx.addIssue({ path: ["value"], message: "Access token is required for Instagram", code: "custom" });
+            if (!data.instagramBusinessId) ctx.addIssue({ path: ["instagramBusinessId"], message: "Instagram Business ID is required", code: "custom" });
+          }
         } else {
           // --- UPDATED ---: This is for API Keys (OpenAI, Gemini, etc.)
           if (!data.value || data.value.length < 1) {
@@ -88,6 +93,7 @@ export const credentialsRouter = createTRPCRouter({
           smtpUser: input.smtpUser ?? null,
           smtpPassword: input.smtpPassword ?? null,
           secure: input.secure ?? false,
+          instagramBusinessId: input.instagramBusinessId ?? null
         },
       });
     }),
@@ -122,6 +128,7 @@ export const credentialsRouter = createTRPCRouter({
         smtpUser: z.string().optional(),
         smtpPassword: z.string().optional(),
         secure: z.boolean().optional(),
+        instagramBusinessId: z.string().optional()
       })
       // --- ADDED ---: We should also validate the update
       .superRefine((data, ctx) => {
@@ -163,6 +170,7 @@ export const credentialsRouter = createTRPCRouter({
           smtpUser: input.smtpUser ?? null,
           smtpPassword: input.smtpPassword ?? null,
           secure: input.secure ?? false,
+          instagramBusinessId: input.instagramBusinessId ?? null
         }
       })
     }),
@@ -190,6 +198,7 @@ export const credentialsRouter = createTRPCRouter({
           smtpUser: true,
           smtpPassword: true,
           secure: true,
+          instagramBusinessId: true
         }
       });
     }),

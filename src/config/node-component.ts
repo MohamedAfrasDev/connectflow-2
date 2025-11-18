@@ -6,6 +6,8 @@ import { DiscordNode } from "@/features/executions/components/discord/node";
 import { GeminiNode } from "@/features/executions/components/gemini/node";
 import { GmailNode } from "@/features/executions/components/gmail/node";
 import { HttpRequestNode } from "@/features/executions/components/http-request/node";
+import { InstagramNode } from "@/features/executions/components/instagram/node";
+import { LumaNode } from "@/features/executions/components/luma/node";
 import { OpenAINode } from "@/features/executions/components/openai/node";
 import { PerlexityNode } from "@/features/executions/components/perplexity/node";
 import { APITriggerNode } from "@/features/triggers/components/api-trigger/node";
@@ -34,6 +36,8 @@ export const nodeComponent = {
    [NodeType.API]: APITriggerNode,
 
    [NodeType.CUSTOM_MAIL]: CustomMailNode,
+   [NodeType.INSTAGRAM]: InstagramNode,
+   [NodeType.LUMA]: LumaNode,
 
 } as const;
 

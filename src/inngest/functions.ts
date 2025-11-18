@@ -17,6 +17,8 @@ import { discordChannel } from "./channels/discord";
 import { gmailChannel } from "./channels/gmail";
 import { apiTriggerChannel } from "./channels/api-trigger";
 import { customMailChannel } from "./channels/custom_mail";
+import { instagramChannel } from "./channels/instagram";
+import { lumaChannel } from "./channels/luma";
 
 
 
@@ -41,6 +43,8 @@ export const executeWorkflow = inngest.createFunction(
       gmailChannel(),
       apiTriggerChannel(),
       customMailChannel(),
+      instagramChannel(),
+      lumaChannel(),
     ]
   },
   async ({ event, step, publish }) => {
@@ -63,9 +67,9 @@ export const executeWorkflow = inngest.createFunction(
 
     });
 
-    const userId = await step.run("find-user-id",async () => {
+    const userId = await step.run("find-user-id", async () => {
       const workflow = await prisma.workflow.findUniqueOrThrow({
-        where: { id: workflowId},
+        where: { id: workflowId },
         select: {
           userId: true,
         }
@@ -75,28 +79,28 @@ export const executeWorkflow = inngest.createFunction(
     });
 
 
-// FIX: support both initialData and api and preserve all event data
-// Build ONLY real context, without polluting it with event-level fields
-// FIX: support both initialData and api properly
-let context: Record<string, any> = {
-  ...(event.data.initialData ?? {}),
-};
+    // FIX: support both initialData and api and preserve all event data
+    // Build ONLY real context, without polluting it with event-level fields
+    // FIX: support both initialData and api properly
+    let context: Record<string, any> = {
+      ...(event.data.initialData ?? {}),
+    };
 
-if (event.data.api && Object.keys(event.data.api).length) {
-  context.api = event.data.api;
-}
+    if (event.data.api && Object.keys(event.data.api).length) {
+      context.api = event.data.api;
+    }
 
-for (const node of sortedNodes) {
-  const executor = getExecutor(node.type as NodeType);
-  context = await executor({
-    data: node.data as Record<string, unknown>,
-    nodeId: node.id,
-    userId,
-    context,
-    step,
-    publish,
-  });
-}
+    for (const node of sortedNodes) {
+      const executor = getExecutor(node.type as NodeType);
+      context = await executor({
+        data: node.data as Record<string, unknown>,
+        nodeId: node.id,
+        userId,
+        context,
+        step,
+        publish,
+      });
+    }
 
   }
 );
