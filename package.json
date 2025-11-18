@@ -11,7 +11,8 @@
     "format": "biome format --write",
     "inngest:dev": "inngest-cli dev",
     "dev:all": "mprocs",
-    "postinstall": "prisma generate"
+    "postinstall": "npx prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.23",
