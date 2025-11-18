@@ -1,12 +1,18 @@
 import {withSentryConfig} from "@sentry/nextjs";
 import type { NextConfig } from "next";
-
+const { PrismaPlugin } = require("@prisma/nextjs-monorepo-workaround-plugin");
 const nextConfig: NextConfig = {
   devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,
   },
   output: 'standalone',
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+        config.plugins = [...config.plugins, new PrismaPlugin()];
+    }
+    return config;
+},
   async redirects() {
     return[
       {
