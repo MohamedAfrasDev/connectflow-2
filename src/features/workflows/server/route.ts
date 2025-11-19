@@ -1,6 +1,6 @@
 import { PAGINATION } from "@/config/constants";
 import { Edge, Node } from "@xyflow/react";
-import { NodeType } from "@/generated/prisma/enums";
+@/generated/prisma
 import prisma from "@/lib/db";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 import { generateSlug } from "random-word-slugs";

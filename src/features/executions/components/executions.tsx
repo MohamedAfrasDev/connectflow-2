@@ -11,7 +11,7 @@ import {  useSuspenseExecutions } from "../hooks/use-execution";
 
 
 import { CheckCircle2Icon, ClockIcon, Loader2Icon, XCircleIcon } from "lucide-react";
-import { ExecutionStatus } from "@/generated/prisma/enums";
+import { ExecutionStatus } from "@/generated/prisma";
 
 export const ExecutionList = () => {
   const executions = useSuspenseExecutions();
