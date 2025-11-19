@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tansta
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCredentialParams } from "./use-credentials-params";
-import { CredentialType } from "@/generated/prisma/enums";
+@/generated/prisma"
 
 
 export const useSuspenseCredentials = () => {

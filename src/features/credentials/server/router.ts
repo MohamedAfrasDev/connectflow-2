@@ -1,7 +1,7 @@
 import { PAGINATION } from "@/config/constants";
 // Edge and Node are not used in this file, so they can be removed if you wish
 // import { Edge, Node } from "@xyflow/react"; 
-import { CredentialType } from "@/generated/prisma/enums";
+@/generated/prisma"
 import prisma from "@/lib/db";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 // generateSlug is not used, can be removed
