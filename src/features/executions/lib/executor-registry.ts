@@ -1,4 +1,3 @@
-@/generated/prisma
 import { NodeExecutor } from "../types";
 import { manualTriggerExecutor } from "@/features/triggers/components/manual-trigger/executor";
 import { httpRequestExecutor } from "../components/http-request/executor";
@@ -15,6 +14,7 @@ import { apiExecutor } from "@/features/triggers/components/api-trigger/executor
 import { customMailExecutor } from "../components/custom_mail/executor";
 import { instagramExecutor } from "../components/instagram/executor";
 import { lumaExecutor } from "../components/luma/executor";
+import { NodeType } from "@/generated/prisma";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.MANUAL_TRIGGER]:manualTriggerExecutor,
