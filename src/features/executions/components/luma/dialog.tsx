@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
-@/generated/prisma"
+import { CredentialType } from "@/generated/prisma";
 
 // LUMA IMAGE-ONLY SCHEMA
 const formSchema = z.object({

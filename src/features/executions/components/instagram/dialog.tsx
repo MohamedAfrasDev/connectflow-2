@@ -34,7 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
-@/generated/prisma"
+import { CredentialType } from "@/generated/prisma";
 
 /* --------------- Schema --------------- */
 const formSchema = z.object({
