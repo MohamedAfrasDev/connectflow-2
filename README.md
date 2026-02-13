@@ -1,36 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Technical Summary: Full-Stack Workflow Automation Platform
+Stack: Next.js (TypeScript), n8n (Core Engine), Inngest (Event Orchestration), PostgreSQL (Supabase/Prisma).
 
-## Getting Started
+The Engineering Challenge
+The objective was to build a scalable automation platform capable of handling complex, asynchronous background workflows without blocking the main event loop or losing data during high-concurrency periods.
 
-First, run the development server:
+Key Technical Implementations (Year 2 Entry Evidence):
+Event-Driven Architecture: Utilized Inngest to implement a durable execution layer. This allowed for long-running workflows with complex retry logic and state persistence, demonstrating a deep understanding of distributed systems and asynchronous programming.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Concurrency & Queue Management: Instead of basic REST polling, I implemented an event-bus pattern. This proves my readiness to bypass the "Systems Architecture" and "Web Development" Year 1 modules, as I have already mastered handling race conditions and task scheduling.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Schema Design & Type Safety: By using TypeScript with Prisma, I maintained a strictly typed data layer across the frontend and backend, ensuring data integrity across complex JSON payloads typical of automation tools.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+API Orchestration: Integrated the n8n self-hosted engine via its REST API, managing authentication headers and rate-limiting to maintain system stability.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+graph TD
+    A[Next.js Frontend] -->|Trigger Event| B[Inngest Event Bus]
+    B -->|Persist State| C[(PostgreSQL)]
+    B -->|Execute Logic| D[n8n Engine]
+    D -->|Callback| B
