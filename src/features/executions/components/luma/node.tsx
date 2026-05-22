@@ -8,11 +8,12 @@ import { LUMA_CHANNEL_NAME } from "@/inngest/channels/luma";
 import { fetchLumaRealtimeToken } from "./action";
 import { LumaFormValues, LumaDialog } from "./dialog";
 
-
 type LumaNodeData = {
-    webhookUrl?:string;
-    content?: string;
-    username?: string;
+    variableName?: string;
+    apiCredentialId?: string;
+    imagePrompt?: string;
+    imageCount?: string;
+    imageSize?: string;
 };
 
 type LumaNodeType = Node<LumaNodeData>;
@@ -25,7 +26,7 @@ export const LumaNode = memo((props: NodeProps<LumaNodeType>) => {
         channel: LUMA_CHANNEL_NAME,
         topic: "status",
         refreshToken: fetchLumaRealtimeToken
-    })
+    });
     const { setNodes } = useReactFlow();
 
     const handleSubmit = (values: LumaFormValues) => {
@@ -35,35 +36,31 @@ export const LumaNode = memo((props: NodeProps<LumaNodeType>) => {
                     ...node,
                     data: {
                         ...node.data,
-                        variableName: values.variableName,   // <<< REQUIRED
-                        webhookUrl: values.webhookUrl,
-                        content: values.content,
-                        username: values.username
+                        variableName: values.variableName,
+                        apiCredentialId: values.apiCredentialId,
+                        imagePrompt: values.imagePrompt,
+                        imageCount: values.imageCount,
+                        imageSize: values.imageSize,
                     }
-                }
+                };
             }
             return node;
-        }))
-    }
-
+        }));
+    };
 
     const handleOpenSettings = () => setDialogOpen(true);
     const nodeData = props.data;
-    const description = nodeData?.content
-        ? `Send : ${nodeData.content.slice(0,50)}...`
+    const description = nodeData?.imagePrompt
+        ? `Generate: ${nodeData.imagePrompt.slice(0, 50)}...`
         : "Not configured";
-
-
 
     return (
         <>
-
             <LumaDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onSubmit={handleSubmit}
                 defaultValues={nodeData}
-
             />
             <BaseExecutionNode
                 {...props}

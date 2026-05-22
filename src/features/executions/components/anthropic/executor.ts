@@ -78,7 +78,7 @@ export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({
  });
 
  if(!credential) {
-  throw new NonRetriableError("Gemini node: Credential not found");
+  throw new NonRetriableError("Anthropic node: Credential not found");
  }
 
  const anthropic = createAnthropic({

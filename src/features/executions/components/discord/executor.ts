@@ -1,12 +1,7 @@
 import type { NodeExecutor } from "@/features/executions/types";
 
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
-
-
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
-import prisma from "@/lib/db";
 import { discordChannel } from "@/inngest/channels/discord";
 
 import { decode } from "html-entities";

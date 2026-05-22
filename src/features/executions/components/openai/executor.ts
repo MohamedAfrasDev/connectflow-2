@@ -78,7 +78,7 @@ export const openAIExecutor: NodeExecutor<OpenAIData> = async ({
  });
 
  if(!credential) {
-  throw new NonRetriableError("Gemini node: Credential not found");
+  throw new NonRetriableError("OpenAI node: Credential not found");
  }
 
  

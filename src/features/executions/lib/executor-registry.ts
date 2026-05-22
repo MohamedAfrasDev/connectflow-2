@@ -30,6 +30,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.PERPLEXITY]:perplexityExecutor,
 
     [NodeType.DISCORD]:discordExecutor,
+    // TODO: Slack uses a different payload format (text/blocks) and its own
+    // incoming-webhook URL scheme.  Replace with a dedicated slackExecutor.
     [NodeType.SLACK]:discordExecutor,
 
     [NodeType.GMAIL]:gmailExecutor,

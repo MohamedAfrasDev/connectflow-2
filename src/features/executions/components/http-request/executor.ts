@@ -118,8 +118,6 @@ if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
         },
       };
 
-      const variableName = data.variableName;
-
       return {
         ...context,
         [data.variableName]: responsePayload,

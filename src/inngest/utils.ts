@@ -40,7 +40,7 @@ export const topologicalSort = (
 
     } catch (error) {
         if(error instanceof Error && error.message.includes("Cyclic")) {
-            throw new Error("Workflow contains a cy");
+            throw new Error("Workflow contains a cycle — remove the circular connection before executing.");
         }
         throw error;
     }

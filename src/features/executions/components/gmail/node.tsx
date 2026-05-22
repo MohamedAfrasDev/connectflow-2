@@ -18,11 +18,7 @@ type GmailNodeData = {
 
 type GmailNodeType = Node<GmailNodeData>;
 
-interface Props extends NodeProps<GmailNodeType> {
-  credentials: { id: string; name: string }[];
-}
-
-export const GmailNode = memo(({ credentials, ...props }: Props) => {
+export const GmailNode = memo((props: NodeProps<GmailNodeType>) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const nodeStatus = useNodeStatus({

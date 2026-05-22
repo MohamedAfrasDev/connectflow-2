@@ -48,7 +48,6 @@ export const credentialsRouter = createTRPCRouter({
             });
           }
         } else if (data.type === CredentialType.CustomMail) {
-          // --- ADDED ---: Validation for CustomMail
           if (!data.smtpHost) {
             ctx.addIssue({ path: ["smtpHost"], message: "SMTP host required", code: "custom" });
           }
@@ -61,12 +60,15 @@ export const credentialsRouter = createTRPCRouter({
           if (!data.smtpPassword) {
             ctx.addIssue({ path: ["smtpPassword"], message: "SMTP password required", code: "custom" });
           }
+        } else if (data.type === CredentialType.INSTAGRAM) {
+          if (!data.value) {
+            ctx.addIssue({ path: ["value"], message: "Access token is required for Instagram", code: "custom" });
+          }
           if (!data.instagramBusinessId) {
-            if (!data.value) ctx.addIssue({ path: ["value"], message: "Access token is required for Instagram", code: "custom" });
-            if (!data.instagramBusinessId) ctx.addIssue({ path: ["instagramBusinessId"], message: "Instagram Business ID is required", code: "custom" });
+            ctx.addIssue({ path: ["instagramBusinessId"], message: "Instagram Business ID is required", code: "custom" });
           }
         } else {
-          // --- UPDATED ---: This is for API Keys (OpenAI, Gemini, etc.)
+          // API key types (OpenAI, Gemini, Anthropic, DeepSeek, Perplexity, etc.)
           if (!data.value || data.value.length < 1) {
             ctx.addIssue({
               path: ["value"],
@@ -144,8 +146,15 @@ export const credentialsRouter = createTRPCRouter({
           if (!data.smtpPort) ctx.addIssue({ path: ["smtpPort"], message: "SMTP port required", code: "custom" });
           if (!data.smtpUser) ctx.addIssue({ path: ["smtpUser"], message: "SMTP username required", code: "custom" });
           if (!data.smtpPassword) ctx.addIssue({ path: ["smtpPassword"], message: "SMTP password required", code: "custom" });
+        } else if (data.type === CredentialType.INSTAGRAM) {
+          if (!data.value) {
+            ctx.addIssue({ path: ["value"], message: "Access token is required for Instagram", code: "custom" });
+          }
+          if (!data.instagramBusinessId) {
+            ctx.addIssue({ path: ["instagramBusinessId"], message: "Instagram Business ID is required", code: "custom" });
+          }
         } else {
-          // API Key types
+          // API key types (OpenAI, Gemini, Anthropic, DeepSeek, Perplexity, etc.)
           if (!data.value || data.value.trim().length < 1) {
             ctx.addIssue({ path: ["value"], message: "API key required", code: "custom" });
           }

@@ -25,11 +25,12 @@ export const instagramExecutor: NodeExecutor<InstagramData> = async ({
   step,
   publish,
 }) => {
-  // Start loading status
   await publish(instagramChannel().status({ nodeId, status: "loading" }));
 
-  // --- Validation ---
-  
+  if (!data.variableName) {
+    await publish(instagramChannel().status({ nodeId, status: "error" }));
+    throw new NonRetriableError("Instagram node: Variable name is missing");
+  }
   if (!data.credentialId) {
     await publish(instagramChannel().status({ nodeId, status: "error" }));
     throw new NonRetriableError("Instagram node: Credential ID is missing");
@@ -39,48 +40,29 @@ export const instagramExecutor: NodeExecutor<InstagramData> = async ({
     throw new NonRetriableError("Instagram node: Image URL is missing");
   }
 
-  // --- Load credential ---
-  // Load credential
-const credential = await step.run("get-credential", async () => {
-  return prisma.credential.findUnique({
-    where: { id: data.credentialId, userId },
-    select: { value: true }, // `value` is stored as string in DB
+  // Load credential — access token is stored in `value`, business ID in its own column.
+  const credential = await step.run("get-credential", async () => {
+    return prisma.credential.findUnique({
+      where: { id: data.credentialId, userId },
+      select: { value: true, instagramBusinessId: true },
+    });
   });
-});
 
-if (!credential?.value) {
-  await publish(instagramChannel().status({ nodeId, status: "error" }));
-  throw new NonRetriableError("Instagram node: Credential not found or invalid");
-}
-
-// Parse JSON string
-let parsedValue: { accessToken: string; instagramBusinessId: string };
-try {
-  parsedValue = JSON.parse(credential.value);
-} catch (err) {
-  throw new NonRetriableError("Instagram node: Credential value is not valid JSON");
-}
-
-const { accessToken, instagramBusinessId } = parsedValue;
-
-if (!accessToken || !instagramBusinessId) {
-  throw new NonRetriableError(
-    "Instagram node: accessToken or instagramBusinessId missing in credential"
-  );
-}
-
-
-  if (!accessToken || !instagramBusinessId) {
+  if (!credential?.value || !credential.instagramBusinessId) {
     await publish(instagramChannel().status({ nodeId, status: "error" }));
-    throw new NonRetriableError("Instagram node: accessToken or instagramBusinessId missing in credential");
+    throw new NonRetriableError(
+      "Instagram node: Credential not found or missing accessToken / instagramBusinessId"
+    );
   }
 
-  // --- Compile templates ---
+  const accessToken = credential.value;
+  const instagramBusinessId = credential.instagramBusinessId;
+
+  // Compile templates
   const compiledImageUrl = Handlebars.compile(data.imageUrl)(context);
   const compiledCaption = data.caption ? Handlebars.compile(data.caption)(context) : "";
 
   try {
-    
     const result = await step.run("instagram-create-and-publish", async () => {
       // 1️⃣ Create media container
       const creationRes = await ky.post(
@@ -96,7 +78,7 @@ if (!accessToken || !instagramBusinessId) {
         }
       );
 
-      const creationJson = (await creationRes.json()) as { id?: string; error?: any };
+      const creationJson = (await creationRes.json()) as { id?: string; error?: unknown };
       if (!creationJson.id) {
         throw new NonRetriableError(
           `Instagram node: Failed to create media container. ${JSON.stringify(creationJson.error)}`
@@ -117,20 +99,16 @@ if (!accessToken || !instagramBusinessId) {
         }
       );
 
-      const publishJson = (await publishRes.json()) as { id?: string; error?: any };
+      const publishJson = (await publishRes.json()) as { id?: string; error?: unknown };
       if (!publishJson.id) {
         throw new NonRetriableError(
           `Instagram node: Failed to publish media. ${JSON.stringify(publishJson.error)}`
         );
       }
-      if (!data.variableName) {
-        await publish(instagramChannel().status({ nodeId, status: "error" }));
-        throw new NonRetriableError("Instagram node: Variable name is missing");
-      }
-      // ✅ Return updated context
+
       return {
         ...context,
-        [data.variableName]: {
+        [data.variableName!]: {
           success: true,
           creationId,
           postId: publishJson.id,

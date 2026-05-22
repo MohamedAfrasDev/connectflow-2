@@ -1,17 +1,27 @@
 import crypto from 'crypto';
 
-// 1. Get your raw secret from env (can be any length string now)
-const RAW_SECRET = process.env.API_SECRET_KEY || 'afras4432'; 
+// Hash the secret to always produce a 32-byte AES-256 key.
+// Throws on startup if the env variable is not configured so misconfiguration
+// is caught immediately rather than silently using a known fallback value.
+function buildEncryptionKey(): Buffer {
+  const secret = process.env.API_SECRET_KEY;
+  if (!secret) {
+    throw new Error(
+      'API_SECRET_KEY environment variable is not set. ' +
+      'Set it to a strong random string before starting the server.'
+    );
+  }
+  return crypto.createHash('sha256').update(secret).digest();
+}
 
-// 2. ⚠️ FIX: Hash the key to ensure it is EXACTLY 32 bytes (256 bits)
-// This prevents the "Invalid key length" crash forever.
-const ENCRYPTION_KEY = crypto.createHash('sha256').update(String(RAW_SECRET)).digest();
+const ENCRYPTION_KEY = buildEncryptionKey();
 
 const IV_LENGTH = 16; // AES block size is always 16
 
 type KeyPayload = {
   userId: string;
   workflowId: string;
+  triggerNodeId?: string;
 };
 
 export function generateAPIKey(payload: KeyPayload): string {

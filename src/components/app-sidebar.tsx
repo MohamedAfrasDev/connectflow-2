@@ -40,7 +40,7 @@ const menuItems = [
 export const AppSidebar = () => {
   const router = useRouter();
   const pathName = usePathname();
-  const { hasActiveSubscription, isLoading, refetch, customerState } =
+  const { hasActiveSubscription, isLoading, refetch } =
     useHasActiveSubscription();
   const queryClient = useQueryClient();
 
@@ -73,9 +73,11 @@ export const AppSidebar = () => {
     setTimeout(() => refetch(), 3000);
   };
 
-  // Example click to view customer state
+  // Open the Polar customer portal (manage subscription, invoices, etc.)
+  // The better-auth Polar plugin registers /api/auth/portal which redirects
+  // to the hosted customer portal with a short-lived session token.
   const handleClick = () => {
-    console.log(customerState);
+    router.push("/api/auth/portal");
   };
 
   return (

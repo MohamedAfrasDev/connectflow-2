@@ -1,6 +1,4 @@
 import type { NodeExecutor } from "@/features/executions/types";
-import { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
-import { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import { stripeTriggerChannel } from "@/inngest/channels/stripe-trigger";
 
 

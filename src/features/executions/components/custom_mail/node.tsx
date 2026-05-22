@@ -19,11 +19,7 @@ type CustomMailNodeData = {
 
 type CustomMailNodeType = Node<CustomMailNodeData>;
 
-interface Props extends NodeProps<CustomMailNodeType> {
-  credentials: { id: string; name: string }[];
-}
-
-export const CustomMailNode = memo(({ credentials, ...props }: Props) => {
+export const CustomMailNode = memo((props: NodeProps<CustomMailNodeType>) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const nodeStatus = useNodeStatus({

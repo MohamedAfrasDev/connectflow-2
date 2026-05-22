@@ -7,8 +7,10 @@ import superjson from "superjson";
 export const createTRPCContext = cache(async () => {
   /**
    * @see: https://trpc.io/docs/server/context
+   * Base context is intentionally empty — authenticated user data is injected
+   * by protectedProcedure / premiumProcedure middleware below.
    */
-  return { userId: 'user_123' };
+  return {};
 });
 // Avoid exporting the entire t-object
 // since it's not very descriptive.
@@ -33,7 +35,7 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx,
     if(!session) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: 'unauthroized',
+        message: 'unauthorized',
       });
     }
 
