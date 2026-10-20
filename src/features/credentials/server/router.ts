@@ -239,6 +239,7 @@ export const credentialsRouter = createTRPCRouter({
             }
           },
           orderBy: { updatedAt: "desc" },
+          select: { id: true, name: true, type: true, createdAt: true, updatedAt: true },
         }),
         prisma.credential.count({
           where: {
@@ -278,7 +279,8 @@ export const credentialsRouter = createTRPCRouter({
         where: { type, userId: ctx.auth.user.id },
         orderBy: {
           updatedAt: "desc"
-        }
+        },
+        select: { id: true, name: true, type: true, createdAt: true, updatedAt: true },
       })
     })
 

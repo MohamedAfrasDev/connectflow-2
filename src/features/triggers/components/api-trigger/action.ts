@@ -16,7 +16,7 @@ export async function fetchAPITriggerRealtimeToken() {
 
 
 import { generateAPIKey } from "@/lib/api-key"; // The encryption helper we wrote previously
-import { auth } from "@/lib/auth";
+import prisma from "@/lib/db";
 import { requireAuth } from "@/lib/auth-utils";
 
 export const getAPITriggerKey = async (workflowId: string, nodeId: string) => {
@@ -26,7 +26,16 @@ export const getAPITriggerKey = async (workflowId: string, nodeId: string) => {
     throw new Error("Unauthorized");
   }
 
-  // 2. Generate the Encrypted Key
+  // 2. Make sure the workflow (and trigger node) belongs to this user
+  const workflow = await prisma.workflow.findFirst({
+    where: { id: workflowId, userId: session.user.id, nodes: { some: { id: nodeId } } },
+    select: { id: true },
+  });
+  if (!workflow) {
+    throw new Error("Workflow not found");
+  }
+
+  // 3. Generate the Encrypted Key
   const apiKey = generateAPIKey({
     userId: session.user.id,
     workflowId: workflowId,

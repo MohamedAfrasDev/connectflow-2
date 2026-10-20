@@ -73,7 +73,7 @@ export const workflowsRouter = createTRPCRouter({
                 nodes: z.array(
                     z.object({
                         id: z.string(),
-                        type: z.string().nullish(),
+                        type: z.enum(NodeType),
                         position: z.object({ x: z.number(), y: z.number() }),
                         data: z.record(z.string(), z.any()).optional(),
                     }),
@@ -92,6 +92,14 @@ export const workflowsRouter = createTRPCRouter({
 
             const { id, nodes, edges } = input;
 
+            const nodeIds = new Set(nodes.map((n) => n.id));
+            if (nodeIds.size !== nodes.length) {
+                throw new TRPCError({ code: "BAD_REQUEST", message: "Duplicate node ids" });
+            }
+            if (edges.some((e) => !nodeIds.has(e.source) || !nodeIds.has(e.target))) {
+                throw new TRPCError({ code: "BAD_REQUEST", message: "Edge references unknown node" });
+            }
+
             const workflow = await prisma.workflow.findUniqueOrThrow({
                 where: { id, userId: ctx.auth.user.id }
             });
@@ -105,8 +113,8 @@ export const workflowsRouter = createTRPCRouter({
                     data: nodes.map((node) => ({
                         id: node.id,
                         workflowId: id,
-                        name: node.type || "unknown",
-                        type: node.type as NodeType,
+                        name: node.type,
+                        type: node.type,
                         position: node.position,
                         data: node.data || {},
                     })),

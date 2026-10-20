@@ -3,6 +3,7 @@ import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
 
 import Handlebars from "handlebars";
+import { assertPublicHost } from "@/lib/ssrf";
 import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 Handlebars.registerHelper("json", (context) => {
@@ -75,16 +76,27 @@ if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
 
 
       // Final absolute URL check
+      let parsedUrl: URL;
       try {
-        new URL(endpoint);
+        parsedUrl = new URL(endpoint);
       } catch {
         throw new NonRetriableError(
           `Invalid final URL: "${endpoint}" (after template resolution)`
         );
       }
 
+      // SSRF guard: block loopback / private / metadata addresses
+      try {
+        await assertPublicHost(parsedUrl.hostname);
+      } catch (e) {
+        throw new NonRetriableError(
+          `HTTP Request node: ${e instanceof Error ? e.message : "blocked host"}`
+        );
+      }
+
       const method = data.method;
-      const options: KyOptions = { method };
+      // redirects are not followed so a public URL cannot bounce to an internal one
+      const options: KyOptions = { method, redirect: "manual", timeout: 30_000 };
 
       // ---------- BODY HANDLING ----------
       if (["POST", "PUT", "PATCH"].includes(method) && data.body) {

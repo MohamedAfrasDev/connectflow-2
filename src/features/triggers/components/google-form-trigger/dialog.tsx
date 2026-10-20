@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { CopyIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { getWebhookToken } from "@/lib/webhook-token-action";
 import { generateGoogleFormScript } from "./utils";
 
 interface Props {
@@ -31,7 +33,14 @@ export const GoogleFormTriggerDialog = ({
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-    const webhookUrl = `${baseUrl}/api/webhooks/google-form?workflowId=${workflowId}`;
+    const [token, setToken] = useState("");
+
+    useEffect(() => {
+        if (!open) return;
+        getWebhookToken(workflowId).then(setToken).catch(() => toast.error("Failed to load webhook token"));
+    }, [open, workflowId]);
+
+    const webhookUrl = `${baseUrl}/api/webhooks/google-form?workflowId=${workflowId}&token=${token}`;
 
     const copyToClipboard = async () => {
         try {

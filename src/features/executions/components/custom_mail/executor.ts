@@ -2,6 +2,7 @@ import type { NodeExecutor } from "@/features/executions/types";
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
 import prisma from "@/lib/db";
+import { assertPublicHost } from "@/lib/ssrf";
 import nodemailer, { SentMessageInfo } from "nodemailer";
 import { customMailChannel } from "@/inngest/channels/custom_mail";
 
@@ -82,6 +83,15 @@ export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
     // Publish the error status before throwing
     await publish(customMailChannel().status({ nodeId, status: "error" }));
     throw new NonRetriableError("Custom Mail node: Credential not found or invalid (Missing host, user, or password)");
+  }
+
+  try {
+    await assertPublicHost(credential.smtpHost);
+  } catch (e) {
+    await publish(customMailChannel().status({ nodeId, status: "error" }));
+    throw new NonRetriableError(
+      `Custom Mail node: ${e instanceof Error ? e.message : "SMTP host not allowed"}`
+    );
   }
 
   const compiledTo = Handlebars.compile(data.to)(context);
