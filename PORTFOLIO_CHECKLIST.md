@@ -3,19 +3,23 @@
 What reviewers look for (from the sources at the bottom), checked against this repo.
 `[x]` = already done, `[ ]` = to do. Items marked **(high impact)** are what a recruiter notices in the first minute.
 
+## Progress
+**Done:** README, ARCHITECTURE, `.env.example`, LICENSE, repo cleanup, security fixes.
+**Next (highest impact first):** screenshots/GIF, deploy + live demo link, tests + GitHub Actions, re-enable TypeScript build checks, case study, pin the repo.
+
 ## 1. First impression (README + repo front page)
-- [ ] **(high impact)** Real `README.md` — today it is a byte-for-byte copy of `ARCHITECTURE.md` (990 lines). Make README short; keep the deep dive in ARCHITECTURE.md and link to it.
-- [ ] **(high impact)** One-line pitch at the top: "Visual workflow automation platform (n8n/Zapier-style) built with Next.js, tRPC, Prisma, Inngest."
+- [x] **(high impact)** Real `README.md` (short project page) with the deep dive moved to a simplified `ARCHITECTURE.md` (~170 lines)
+- [x] **(high impact)** One-line pitch at the top
 - [ ] **(high impact)** Screenshots or a 30–60s GIF/video of the editor running a workflow
 - [ ] **(high impact)** Live demo link (and demo login or a read-only demo account)
-- [ ] Tech-stack badges/list near the top
-- [ ] "Features" list (15 node types, real-time status, API trigger, webhooks)
-- [ ] "Getting started": prerequisites, `npm install`, env setup, DB migrate, `npm run dev:all`
-- [ ] `.env.example` with placeholders for every variable (list is in ARCHITECTURE.md §14)
-- [ ] "Challenges & decisions" section: why Inngest for durable execution, topological sort, executor registry, security model
-- [ ] "What I'd improve next" (shows self-awareness; see §6 below)
+- [x] Tech-stack list near the top (badges optional)
+- [x] "Features" list
+- [x] "Getting started": prerequisites, install, env setup, DB migrate, dev scripts
+- [x] `.env.example` with placeholders for every variable
+- [x] "What I learned / key decisions" section (Inngest, executor registry, context + Handlebars, security)
+- [x] "Roadmap" section (what to improve next)
 - [ ] Your role stated clearly if any part was not yours
-- [x] Architecture documentation exists (strong differentiator)
+- [x] Architecture documentation exists, now simplified and up to date (strong differentiator)
 
 ## 2. Live demo
 - [ ] Deployed and reachable (Vercel config exists; Polar is hardcoded to `sandbox`, fine for a demo)
@@ -25,7 +29,8 @@ What reviewers look for (from the sources at the bottom), checked against this r
 - [ ] Sensitive nodes (SMTP, Gmail, Instagram) are disabled or sandboxed in the public demo
 
 ## 3. Code quality and repo hygiene
-- [ ] **(high impact)** Remove committed junk: `mprocs.log`, `tsconfig.tsbuildinfo` (add to `.gitignore`), and the prebuilt Prisma `.node` engine binaries under `src/generated/client` (generated output shouldn't be in git)
+- [x] **(high impact)** Removed committed junk: `mprocs.log` and the stale `src/generated/client` (incl. Prisma `.node` binaries); `.gitignore` updated (`tsbuildinfo` was never tracked)
+- [x] Fixed `mprocs.yaml` script name so `npm run dev:all` works
 - [ ] Turn off `typescript.ignoreBuildErrors` in `next.config.ts` and fix the errors — reviewers who read the config will notice
 - [ ] Run `npm run lint` clean (Biome is configured)
 - [ ] Delete dead code and stale comments ("can be removed if you wish", "--- ADDED ---" markers in credentials router)
@@ -57,7 +62,7 @@ What reviewers look for (from the sources at the bottom), checked against this r
 - [ ] Encrypt credentials at rest (known gap — document it or fix it)
 - [ ] Rate limiting on `/api/trigger` and webhooks
 - [ ] API key revocation
-- [ ] Add a short "Security" section in README summarising the above
+- [x] Short "Security notes" section in README summarising the above (including known gaps)
 - [ ] Confirm no secrets in git history (a quick scan found none) and `.env*` stays ignored
 
 ## 7. Portfolio-site presentation
@@ -68,14 +73,14 @@ What reviewers look for (from the sources at the bottom), checked against this r
 - [ ] Feature this as one of 2–4 flagship projects; hide half-finished ones
 - [ ] Profile README / bio is a pitch, not a keyword dump
 - [ ] LinkedIn and GitHub tell the same story
-- [ ] Add a `LICENSE` file (none today)
+- [x] `LICENSE` file added (MIT)
 
 ## 8. Originality (this project already scores well)
 - [x] Not a tutorial clone: real-time execution engine, 15 integrations, billing, background jobs
 - [ ] Call out in the write-up what is *yours* versus what came from a course or template
 
 ## Suggested order (about a day each)
-1. Real README + screenshots + `.env.example` + remove junk files
+1. ~~Real README + `.env.example` + remove junk files~~ done; still add screenshots
 2. Deploy and verify the demo end to end
 3. Tests for the four pure-logic modules + GitHub Actions
 4. Re-enable TypeScript build checks and fix errors
