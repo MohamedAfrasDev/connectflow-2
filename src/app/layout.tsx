@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { TRPCReactProvider } from "@/trpc/client";
-import { Toaster } from "sonner";
-
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Provider } from "jotai";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Toaster } from "sonner";
+import { TRPCReactProvider } from "@/trpc/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ConnectFlow - Automation",
-  description: "Automate Your Task With ConnectFlow - Developed By Mohamed Afras",
+  description:
+    "Automate Your Task With ConnectFlow - Developed By Mohamed Afras",
 };
 
 export default function RootLayout({
@@ -34,9 +34,7 @@ export default function RootLayout({
       >
         <TRPCReactProvider>
           <Provider>
-            <NuqsAdapter>
-              {children}
-            </NuqsAdapter>
+            <NuqsAdapter>{children}</NuqsAdapter>
 
             <Toaster />
           </Provider>

@@ -2,8 +2,8 @@
 "use server";
 
 import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 import { instagramChannel } from "@/inngest/channels/instagram";
+import { inngest } from "@/inngest/client";
 
 export type InstagramToken = Realtime.Token<
   typeof instagramChannel,

@@ -1,8 +1,8 @@
 "use server";
 
 import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 import { perplexityChannel } from "@/inngest/channels/perplexity";
+import { inngest } from "@/inngest/client";
 
 export type PerplexityToken = Realtime.Token<
   typeof perplexityChannel,

@@ -1,8 +1,8 @@
 "use server";
 
 import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 import { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
+import { inngest } from "@/inngest/client";
 
 export type HttpRequestToken = Realtime.Token<
   typeof manualTriggerChannel,

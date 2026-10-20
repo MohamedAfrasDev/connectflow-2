@@ -4,278 +4,260 @@ import { createId } from "@paralleldrive/cuid2";
 
 import { useReactFlow } from "@xyflow/react";
 
-import {
-    GlobeIcon,
-    MousePointerIcon
-} from "lucide-react";
+import { GlobeIcon, MousePointerIcon } from "lucide-react";
 
 import { useCallback } from "react";
 import { toast } from "sonner";
 
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import { NodeType } from "@/generated/prisma";
 import { Separator } from "./ui/separator";
 
-
 export type NodeTypeOption = {
-    type: NodeType;
-    label: string;
-    descritpion: string;
-    icon: React.ComponentType<{ className?: string }> | string;
+  type: NodeType;
+  label: string;
+  descritpion: string;
+  icon: React.ComponentType<{ className?: string }> | string;
 };
 
 const triggerNodes: NodeTypeOption[] = [
-    {
-        type: NodeType.MANUAL_TRIGGER,
-        label: "Trigger manually",
-        descritpion: "Runs the flow on clicking a button. Good for getting started quickly",
-        icon: MousePointerIcon
-    },
-    {
-        type: NodeType.GOOGLE_FORM_TRIGGER,
-        label: "Google Form",
-        descritpion: "Runs the flow when a Google Form is submitted",
-        icon: "/logos/googleform.svg"
-    },
-    {
-        type: NodeType.STRIPE_TRIGGER,
-        label: "Stripe Event",
-        descritpion: "Runs the flow when a Stripe Event is captured",
-        icon: "/logos/stripe.svg"
-    },
-    {
-        type: NodeType.API,
-        label: "API",
-        descritpion: "Runs the flow when a API called",
-        icon: "/logos/api.svg"
-    },
+  {
+    type: NodeType.MANUAL_TRIGGER,
+    label: "Trigger manually",
+    descritpion:
+      "Runs the flow on clicking a button. Good for getting started quickly",
+    icon: MousePointerIcon,
+  },
+  {
+    type: NodeType.GOOGLE_FORM_TRIGGER,
+    label: "Google Form",
+    descritpion: "Runs the flow when a Google Form is submitted",
+    icon: "/logos/googleform.svg",
+  },
+  {
+    type: NodeType.STRIPE_TRIGGER,
+    label: "Stripe Event",
+    descritpion: "Runs the flow when a Stripe Event is captured",
+    icon: "/logos/stripe.svg",
+  },
+  {
+    type: NodeType.API,
+    label: "API",
+    descritpion: "Runs the flow when a API called",
+    icon: "/logos/api.svg",
+  },
 ];
 
-
 const executionNodes: NodeTypeOption[] = [
-    {
-        type: NodeType.HTTP_REQUEST,
-        label: "HTTP Request",
-        descritpion: "Makes an HTTP request",
-        icon: GlobeIcon,
-    },
-    {
-        type: NodeType.GEMINI,
-        label: "Gemini",
-        descritpion: "Use Google Gemini to generate text",
-        icon: "/logos/gemini.svg",
-    },
-    {
-        type: NodeType.OPENAI,
-        label: "OpenAI",
-        descritpion: "Use OpenAI to generate text",
-        icon: "/logos/openai.svg",
-    },
-    {
-        type: NodeType.ANTHROPIC,
-        label: "Anthropic",
-        descritpion: "Use Anthropic to generate text",
-        icon: "/logos/anthropic.svg",
-    },
-    {
-        type: NodeType.DEEPSEEK,
-        label: "DeepSeek",
-        descritpion: "Use DeepSeek to generate text",
-        icon: "/logos/deepseek.svg",
-    },
-    {
-        type: NodeType.PERPLEXITY,
-        label: "Perplexity",
-        descritpion: "Use Perplexity to generate text",
-        icon: "/logos/perplexity.svg",
-    },
-    {
-        type: NodeType.DISCORD,
-        label: "Discord",
-        descritpion: "Send a message to Discord",
-        icon: "/logos/discord.svg",
-    },
-    {
-        type: NodeType.GMAIL,
-        label: "Gmail",
-        descritpion: "Send a message to Gmail",
-        icon: "/logos/gmail.svg",
-    },
-    {
-        type: NodeType.CUSTOM_MAIL,
-        label: "SMTP (Custom Mail)",
-        descritpion: "Send a message using SMTP",
-        icon: "/logos/email.svg",
-    },
-    {
-        type: NodeType.INSTAGRAM,
-        label: "Instagram",
-        descritpion: "Publish a post to Instagram",
-        icon: "/logos/instagram.svg",
-    },
- 
+  {
+    type: NodeType.HTTP_REQUEST,
+    label: "HTTP Request",
+    descritpion: "Makes an HTTP request",
+    icon: GlobeIcon,
+  },
+  {
+    type: NodeType.GEMINI,
+    label: "Gemini",
+    descritpion: "Use Google Gemini to generate text",
+    icon: "/logos/gemini.svg",
+  },
+  {
+    type: NodeType.OPENAI,
+    label: "OpenAI",
+    descritpion: "Use OpenAI to generate text",
+    icon: "/logos/openai.svg",
+  },
+  {
+    type: NodeType.ANTHROPIC,
+    label: "Anthropic",
+    descritpion: "Use Anthropic to generate text",
+    icon: "/logos/anthropic.svg",
+  },
+  {
+    type: NodeType.DEEPSEEK,
+    label: "DeepSeek",
+    descritpion: "Use DeepSeek to generate text",
+    icon: "/logos/deepseek.svg",
+  },
+  {
+    type: NodeType.PERPLEXITY,
+    label: "Perplexity",
+    descritpion: "Use Perplexity to generate text",
+    icon: "/logos/perplexity.svg",
+  },
+  {
+    type: NodeType.DISCORD,
+    label: "Discord",
+    descritpion: "Send a message to Discord",
+    icon: "/logos/discord.svg",
+  },
+  {
+    type: NodeType.GMAIL,
+    label: "Gmail",
+    descritpion: "Send a message to Gmail",
+    icon: "/logos/gmail.svg",
+  },
+  {
+    type: NodeType.CUSTOM_MAIL,
+    label: "SMTP (Custom Mail)",
+    descritpion: "Send a message using SMTP",
+    icon: "/logos/email.svg",
+  },
+  {
+    type: NodeType.INSTAGRAM,
+    label: "Instagram",
+    descritpion: "Publish a post to Instagram",
+    icon: "/logos/instagram.svg",
+  },
 ];
 
 interface NodeSelectorProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
 }
 
-
 export function NodeSelector({
-    open,
-    onOpenChange,
-    children
+  open,
+  onOpenChange,
+  children,
 }: NodeSelectorProps) {
-    const { setNodes, getNodes, screenToFlowPosition} = useReactFlow();
+  const { setNodes, getNodes, screenToFlowPosition } = useReactFlow();
 
-    const handleNodeSelect = useCallback((selection: NodeTypeOption) => {
-        if(selection.type == NodeType.MANUAL_TRIGGER) {
-            const nodes = getNodes();
-            const hasManualTrigger = nodes.some(
-                (node) => node.type == NodeType.MANUAL_TRIGGER,
-            );
+  const handleNodeSelect = useCallback(
+    (selection: NodeTypeOption) => {
+      if (selection.type === NodeType.MANUAL_TRIGGER) {
+        const nodes = getNodes();
+        const hasManualTrigger = nodes.some(
+          (node) => node.type === NodeType.MANUAL_TRIGGER,
+        );
 
-            if (hasManualTrigger) {
-                toast.error("Only one manual trigger is allowed per workflow");
-                return;
-            }
+        if (hasManualTrigger) {
+          toast.error("Only one manual trigger is allowed per workflow");
+          return;
         }
-        setNodes((nodes) => {
-            const hasInitialTrigger = nodes.some(
-                (node) => node.type == NodeType.INITIAL,
-            );
+      }
+      setNodes((nodes) => {
+        const hasInitialTrigger = nodes.some(
+          (node) => node.type === NodeType.INITIAL,
+        );
 
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
 
-            const flowPosition = screenToFlowPosition({
-                x: centerX + (Math.random() - 0.5) * 200,
-                y: centerY + (Math.random() - 0.5) * 200,
-            });
-
-            const newNode = {
-                id: createId(),
-                data: {},
-                position: flowPosition,
-                type: selection.type,
-            };
-
-            if (hasInitialTrigger) {
-                return [newNode];
-            }
-
-            return [...nodes, newNode];
+        const flowPosition = screenToFlowPosition({
+          x: centerX + (Math.random() - 0.5) * 200,
+          y: centerY + (Math.random() - 0.5) * 200,
         });
 
-        onOpenChange(false);
-    }, [
-        setNodes,
-        getNodes,
-        onOpenChange,
-        screenToFlowPosition,
-    ]);
-    return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetTrigger asChild>{children}</SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>
-                        What triggers this workflow?
-                    </SheetTitle>
-                    <SheetDescription>
-                        A trigger is a step that starts your workflow
-                    </SheetDescription>
-                </SheetHeader>
-                <div>
-                    {triggerNodes.map((nodeType) => {
-                        const Icon = nodeType.icon;
+        const newNode = {
+          id: createId(),
+          data: {},
+          position: flowPosition,
+          type: selection.type,
+        };
 
-                        return (
-                            <div
-                                key={nodeType.type}
-                                className="w-full justify-start h-auto py-5 px-4
+        if (hasInitialTrigger) {
+          return [newNode];
+        }
+
+        return [...nodes, newNode];
+      });
+
+      onOpenChange(false);
+    },
+    [setNodes, getNodes, onOpenChange, screenToFlowPosition],
+  );
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>What triggers this workflow?</SheetTitle>
+          <SheetDescription>
+            A trigger is a step that starts your workflow
+          </SheetDescription>
+        </SheetHeader>
+        <div>
+          {triggerNodes.map((nodeType) => {
+            const Icon = nodeType.icon;
+
+            return (
+              <button
+                type="button"
+                key={nodeType.type}
+                className="w-full justify-start h-auto py-5 px-4
                                 rounded-none cursor-pointer border-l-2 border-transparent
                                 hover:border-l-primary"
-                                onClick={() => handleNodeSelect(nodeType)}
-                            >
-                                <div className="flex items-center overflow-hidden">
+                onClick={() => handleNodeSelect(nodeType)}
+              >
+                <div className="flex items-center overflow-hidden">
+                  {typeof Icon === "string" ? (
+                    <img
+                      src={Icon}
+                      alt={nodeType.label}
+                      className="size-5 object-contain rounded-sm"
+                    />
+                  ) : (
+                    <Icon className="size-5" />
+                  )}
 
-                                    {typeof Icon === "string" ? (
-                                        <img
-                                        src={Icon}
-                                        alt={nodeType.label}
-                                        className="size-5 object-contain rounded-sm"
-                                        />
-                                    ): (
-                                        <Icon className="size-5"/>
-                                    )}
-
-                                    <div className="flex flex-col items-start text-left px-5">
-                                        <span className="font-medium text-sm">
-                                            {nodeType.label}
-                                        </span>
-                                        <span className="text-xs">
-                                            {nodeType.descritpion}
-                                        </span>
-                                    </div>
-
-                                </div>
-                            </div>
-                        )
-                    })}
+                  <div className="flex flex-col items-start text-left px-5">
+                    <span className="font-medium text-sm">
+                      {nodeType.label}
+                    </span>
+                    <span className="text-xs">{nodeType.descritpion}</span>
+                  </div>
                 </div>
-                {/*  */}
-                <Separator/>
-                <div>
-                    {executionNodes.map((nodeType) => {
-                        const Icon = nodeType.icon;
+              </button>
+            );
+          })}
+        </div>
+        {/*  */}
+        <Separator />
+        <div>
+          {executionNodes.map((nodeType) => {
+            const Icon = nodeType.icon;
 
-                        return (
-                            <div
-                                key={nodeType.type}
-                                className="w-full justify-start h-auto py-5 px-4
+            return (
+              <button
+                type="button"
+                key={nodeType.type}
+                className="w-full justify-start h-auto py-5 px-4
                                 rounded-none cursor-pointer border-l-2 border-transparent
                                 hover:border-l-primary"
-                                onClick={() => handleNodeSelect(nodeType)}
-                            >
-                                <div className="flex items-center overflow-hidden">
+                onClick={() => handleNodeSelect(nodeType)}
+              >
+                <div className="flex items-center overflow-hidden">
+                  {typeof Icon === "string" ? (
+                    <img
+                      src={Icon}
+                      alt={nodeType.label}
+                      className="size-5 object-contain rounded-sm"
+                    />
+                  ) : (
+                    <Icon className="size-5" />
+                  )}
 
-                                    {typeof Icon === "string" ? (
-                                        <img
-                                        src={Icon}
-                                        alt={nodeType.label}
-                                        className="size-5 object-contain rounded-sm"
-                                        />
-                                    ): (
-                                        <Icon className="size-5"/>
-                                    )}
-
-                                    <div className="flex flex-col items-start text-left px-5">
-                                        <span className="font-medium text-sm">
-                                            {nodeType.label}
-                                        </span>
-                                        <span className="text-xs">
-                                            {nodeType.descritpion}
-                                        </span>
-                                    </div>
-
-                                </div>
-                            </div>
-                        )
-                    })}
+                  <div className="flex flex-col items-start text-left px-5">
+                    <span className="font-medium text-sm">
+                      {nodeType.label}
+                    </span>
+                    <span className="text-xs">{nodeType.descritpion}</span>
+                  </div>
                 </div>
-
-
-            </SheetContent>
-        </Sheet>
-    );
-};
+              </button>
+            );
+          })}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

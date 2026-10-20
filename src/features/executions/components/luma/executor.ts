@@ -1,10 +1,9 @@
-import type { NodeExecutor } from "@/features/executions/types";
-
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
-import prisma from "@/lib/db";
 import ky from "ky";
+import type { NodeExecutor } from "@/features/executions/types";
 import { lumaChannel } from "@/inngest/channels/luma";
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -60,7 +59,9 @@ export const lumaExecutor: NodeExecutor<LumaData> = async ({
 
   if (!credential?.value) {
     await publish(lumaChannel().status({ nodeId, status: "error" }));
-    throw new NonRetriableError("Luma node: Credential not found or missing API key");
+    throw new NonRetriableError(
+      "Luma node: Credential not found or missing API key",
+    );
   }
 
   const apiKey = credential.value;
@@ -81,13 +82,13 @@ export const lumaExecutor: NodeExecutor<LumaData> = async ({
           },
           throwHttpErrors: false,
           timeout: 30000,
-        }
+        },
       );
 
       const json = (await res.json()) as { id?: string; error?: unknown };
       if (!json.id) {
         throw new NonRetriableError(
-          `Luma node: Failed to start generation. ${JSON.stringify(json.error)}`
+          `Luma node: Failed to start generation. ${JSON.stringify(json.error)}`,
         );
       }
       return json.id;
@@ -105,7 +106,7 @@ export const lumaExecutor: NodeExecutor<LumaData> = async ({
             headers: { Authorization: `Bearer ${apiKey}` },
             throwHttpErrors: false,
             timeout: 15000,
-          }
+          },
         );
 
         const pollJson = (await pollRes.json()) as {
@@ -117,19 +118,23 @@ export const lumaExecutor: NodeExecutor<LumaData> = async ({
         if (pollJson.state === "completed") {
           const url = pollJson.assets?.image;
           if (!url) {
-            throw new NonRetriableError("Luma node: Generation completed but no image URL returned");
+            throw new NonRetriableError(
+              "Luma node: Generation completed but no image URL returned",
+            );
           }
           return url;
         }
 
         if (pollJson.state === "failed") {
           throw new NonRetriableError(
-            `Luma node: Generation failed — ${pollJson.failure_reason ?? "unknown reason"}`
+            `Luma node: Generation failed — ${pollJson.failure_reason ?? "unknown reason"}`,
           );
         }
       }
 
-      throw new NonRetriableError("Luma node: Generation timed out after 120 seconds");
+      throw new NonRetriableError(
+        "Luma node: Generation timed out after 120 seconds",
+      );
     });
 
     await publish(lumaChannel().status({ nodeId, status: "success" }));

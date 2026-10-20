@@ -16,9 +16,14 @@ export function createWebhookToken(workflowId: string): string {
     .digest("hex");
 }
 
-export function verifyWebhookToken(workflowId: string, token: string | null): boolean {
+export function verifyWebhookToken(
+  workflowId: string,
+  token: string | null,
+): boolean {
   if (!token) return false;
   const expected = Buffer.from(createWebhookToken(workflowId));
   const given = Buffer.from(token);
-  return expected.length === given.length && crypto.timingSafeEqual(expected, given);
+  return (
+    expected.length === given.length && crypto.timingSafeEqual(expected, given)
+  );
 }

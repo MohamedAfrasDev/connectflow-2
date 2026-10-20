@@ -31,13 +31,12 @@ export function useNodeStatus({
         (msg) =>
           msg.channel === channel &&
           msg.topic === topic &&
-          msg.data?.nodeId === nodeId
+          msg.data?.nodeId === nodeId,
       )
       .sort((a, b) => {
         if (a.kind === "data" && b.kind === "data") {
           return (
-            new Date(b.createdAt).getTime() -
-            new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
         }
         return 0;

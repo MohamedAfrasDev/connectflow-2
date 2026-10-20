@@ -1,10 +1,10 @@
-import type { NodeExecutor } from "@/features/executions/types";
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
+import nodemailer, { type SentMessageInfo } from "nodemailer";
+import type { NodeExecutor } from "@/features/executions/types";
+import { customMailChannel } from "@/inngest/channels/custom_mail";
 import prisma from "@/lib/db";
 import { assertPublicHost } from "@/lib/ssrf";
-import nodemailer, { SentMessageInfo } from "nodemailer";
-import { customMailChannel } from "@/inngest/channels/custom_mail";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -19,7 +19,6 @@ export type CustomMailData = {
   subject?: string;
   body?: string;
 };
-
 
 export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
   data,
@@ -53,11 +52,10 @@ export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
   }
 
   // Fetch credential
-  const credential = await step.run("get-credential", async () => {
+  const credential = (await step.run("get-credential", async () => {
     return prisma.credential.findUnique({
       where: { id: data.credentialId, userId },
       select: {
-        // --- UPDATED ---
         // Select the correct fields for CustomMail auth
         smtpHost: true,
         smtpPort: true,
@@ -66,8 +64,7 @@ export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
         secure: true,
       },
     });
-  }) as {
-    // --- UPDATED ---
+  })) as {
     smtpHost: string;
     smtpPort: number;
     smtpUser: string;
@@ -75,14 +72,18 @@ export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
     secure: boolean;
   } | null;
 
-
-  // --- UPDATED ---
   // Check for the correct auth fields
-  if (!credential || !credential.smtpUser || !credential.smtpPassword || !credential.smtpHost) {
-    // --- ADDED ---
+  if (
+    !credential ||
+    !credential.smtpUser ||
+    !credential.smtpPassword ||
+    !credential.smtpHost
+  ) {
     // Publish the error status before throwing
     await publish(customMailChannel().status({ nodeId, status: "error" }));
-    throw new NonRetriableError("Custom Mail node: Credential not found or invalid (Missing host, user, or password)");
+    throw new NonRetriableError(
+      "Custom Mail node: Credential not found or invalid (Missing host, user, or password)",
+    );
   }
 
   try {
@@ -90,7 +91,7 @@ export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
   } catch (e) {
     await publish(customMailChannel().status({ nodeId, status: "error" }));
     throw new NonRetriableError(
-      `Custom Mail node: ${e instanceof Error ? e.message : "SMTP host not allowed"}`
+      `Custom Mail node: ${e instanceof Error ? e.message : "SMTP host not allowed"}`,
     );
   }
 
@@ -104,32 +105,26 @@ export const customMailExecutor: NodeExecutor<CustomMailData> = async ({
     port: Number(credential.smtpPort),
     secure: credential.secure,
     auth: {
-      // --- UPDATED ---
       // Use the correct fields for auth
       user: credential.smtpUser,
       pass: credential.smtpPassword,
-      
     },
   });
 
-
   let info: SentMessageInfo;
   try {
-  // ... inside the try block ...
+    // ... inside the try block ...
 
-info = await step.run("Custom Mail-send", async () => {
-  return transporter.sendMail({
-    // --- ADDED: Explicitly set the 'from' address ---
-    from: credential.smtpUser, 
-    // --------------------------------------------------
-    to: compiledTo,
-    cc: data.cc ? Handlebars.compile(data.cc)(context) : undefined,
-    bcc: data.bcc ? Handlebars.compile(data.bcc)(context) : undefined,
-    subject: compiledSubject,
-    html: compiledBody,
-  });
-});
-console.log("Mail sent successfully, server response:", info);
+    info = await step.run("Custom Mail-send", async () => {
+      return transporter.sendMail({
+        from: credential.smtpUser,
+        to: compiledTo,
+        cc: data.cc ? Handlebars.compile(data.cc)(context) : undefined,
+        bcc: data.bcc ? Handlebars.compile(data.bcc)(context) : undefined,
+        subject: compiledSubject,
+        html: compiledBody,
+      });
+    });
     await publish(customMailChannel().status({ nodeId, status: "success" }));
 
     return {
@@ -140,8 +135,10 @@ console.log("Mail sent successfully, server response:", info);
         to: compiledTo,
       },
     };
-  } catch (error: any) {
+  } catch (error) {
     await publish(customMailChannel().status({ nodeId, status: "error" }));
-    throw new NonRetriableError(error.message || "Custom Mail send failed");
+    throw new NonRetriableError(
+      error instanceof Error ? error.message : "Custom Mail send failed",
+    );
   }
 };

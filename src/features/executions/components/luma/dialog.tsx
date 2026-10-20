@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
+import z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
 import {
   Form,
   FormControl,
@@ -17,7 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -25,14 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma";
 
@@ -59,8 +57,14 @@ interface Props {
   defaultValues?: Partial<LumaFormValues>;
 }
 
-export const LumaDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: Props) => {
-  const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.LUMA);
+export const LumaDialog = ({
+  open,
+  onOpenChange,
+  onSubmit,
+  defaultValues = {},
+}: Props) => {
+  const { data: credentials, isLoading: isLoadingCredentials } =
+    useCredentialsByType(CredentialType.LUMA);
 
   const form = useForm<LumaFormValues>({
     resolver: zodResolver(formSchema),
@@ -83,9 +87,9 @@ export const LumaDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
         imageSize: defaultValues.imageSize || "1024x1024",
       });
     }
-  }, [open, defaultValues]);
+  }, [open, defaultValues, form]);
 
-  const varPreview = form.watch("variableName") || "myLuma";
+  const _varPreview = form.watch("variableName") || "myLuma";
 
   const handleSubmit = (values: LumaFormValues) => {
     onSubmit(values);
@@ -103,7 +107,10 @@ export const LumaDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* VARIABLE NAME */}
             <FormField
               control={form.control}
@@ -157,14 +164,17 @@ export const LumaDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                 <FormItem>
                   <FormLabel>Image Prompt</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="A cinematic landscape with neon lights..." rows={3} {...field} />
+                    <Textarea
+                      placeholder="A cinematic landscape with neon lights..."
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-           
             {/* IMAGE SIZE */}
             <FormField
               control={form.control}
@@ -181,7 +191,9 @@ export const LumaDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
             />
 
             <DialogFooter>
-              <Button type="submit" className="w-full">Save</Button>
+              <Button type="submit" className="w-full">
+                Save
+              </Button>
             </DialogFooter>
           </form>
         </Form>

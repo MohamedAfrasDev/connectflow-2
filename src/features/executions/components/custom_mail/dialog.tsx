@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +17,13 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -24,14 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
-import { useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma";
@@ -54,7 +54,7 @@ const formSchema = z.object({
       {
         message:
           "Must be a valid email or a Handlebars variable (e.g., {{api.email}})",
-      }
+      },
     ),
   cc: z.string().optional(),
   bcc: z.string().optional(),
@@ -140,7 +140,8 @@ export const CustomMailDialog = ({
                     <Input placeholder="CustomMailResult" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Reference this output: <code>{`{{${varPreview}.success}}`}</code>
+                    Reference this output:{" "}
+                    <code>{`{{${varPreview}.success}}`}</code>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -162,7 +163,9 @@ export const CustomMailDialog = ({
                         <Select
                           value={controllerField.value || undefined}
                           onValueChange={controllerField.onChange}
-                          disabled={isLoadingCredentials || !credentials?.length}
+                          disabled={
+                            isLoadingCredentials || !credentials?.length
+                          }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a Credential" />
@@ -205,7 +208,10 @@ export const CustomMailDialog = ({
                 <FormItem>
                   <FormLabel>To</FormLabel>
                   <FormControl>
-                    <Input placeholder="receiver@example.com or {{api.email}}" {...field} />
+                    <Input
+                      placeholder="receiver@example.com or {{api.email}}"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     Supports Handlebars variables
@@ -225,7 +231,9 @@ export const CustomMailDialog = ({
                   <FormControl>
                     <Input placeholder="Optional" {...field} />
                   </FormControl>
-                  <FormDescription>Optional, supports Handlebars variables</FormDescription>
+                  <FormDescription>
+                    Optional, supports Handlebars variables
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -241,7 +249,9 @@ export const CustomMailDialog = ({
                   <FormControl>
                     <Input placeholder="Optional" {...field} />
                   </FormControl>
-                  <FormDescription>Optional, supports Handlebars variables</FormDescription>
+                  <FormDescription>
+                    Optional, supports Handlebars variables
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

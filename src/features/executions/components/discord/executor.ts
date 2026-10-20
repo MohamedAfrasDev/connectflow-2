@@ -1,11 +1,9 @@
-import type { NodeExecutor } from "@/features/executions/types";
-
 import Handlebars from "handlebars";
-import { NonRetriableError } from "inngest";
-import { discordChannel } from "@/inngest/channels/discord";
-
 import { decode } from "html-entities";
+import { NonRetriableError } from "inngest";
 import ky from "ky";
+import type { NodeExecutor } from "@/features/executions/types";
+import { discordChannel } from "@/inngest/channels/discord";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -27,17 +25,14 @@ export const discordExecutor: NodeExecutor<DiscordData> = async ({
 }) => {
   await publish(discordChannel().status({ nodeId, status: "loading" }));
 
-
-
-
   if (!data.content) {
     await publish(
       discordChannel().status({
         nodeId,
-        status: "error"
-      })
+        status: "error",
+      }),
     );
-    throw new NonRetriableError("Discord node: Content is missing")
+    throw new NonRetriableError("Discord node: Content is missing");
   }
 
   const rawContent = Handlebars.compile(data.content)(context);
@@ -46,12 +41,12 @@ export const discordExecutor: NodeExecutor<DiscordData> = async ({
     ? decode(Handlebars.compile(data.username)(context))
     : undefined;
 
-
   try {
     const result = await step.run("discord-webhook", async () => {
-      if (!data.webhookUrl) throw new NonRetriableError("Discord node: Webhook URL is missing");
-    
-      let response;
+      if (!data.webhookUrl)
+        throw new NonRetriableError("Discord node: Webhook URL is missing");
+
+      let response: Awaited<ReturnType<typeof ky.post>>;
       try {
         response = await ky.post(data.webhookUrl, {
           json: {
@@ -59,45 +54,43 @@ export const discordExecutor: NodeExecutor<DiscordData> = async ({
             username,
           },
           throwHttpErrors: false, // we'll handle manually
-          timeout: 10000,         // fail if Discord doesn't respond
+          timeout: 10000, // fail if Discord doesn't respond
         });
       } catch (err) {
         await publish(discordChannel().status({ nodeId, status: "error" }));
         throw new NonRetriableError(`Discord node: Request failed: ${err}`);
       }
-    
+
       // Only accept exact 204 from Discord
       if (response.status !== 204) {
         await publish(discordChannel().status({ nodeId, status: "error" }));
         throw new NonRetriableError(
-          `Discord node: Invalid webhook URL or Discord rejected message (status: ${response.status})`
+          `Discord node: Invalid webhook URL or Discord rejected message (status: ${response.status})`,
         );
       }
-    
-      if (!data.variableName) throw new NonRetriableError("Discord node: Variable name is missing");
-    
+
+      if (!data.variableName)
+        throw new NonRetriableError("Discord node: Variable name is missing");
+
       return {
         ...context,
         [data.variableName]: { messageContent: content.slice(0, 2000) },
       };
     });
-    
-
 
     await publish(
       discordChannel().status({
         nodeId,
-        status: "success"
-      })
+        status: "success",
+      }),
     );
-
 
     return result;
   } catch (error) {
     await publish(
       discordChannel().status({
         nodeId,
-        status: "error"
+        status: "error",
       }),
     );
     throw error;

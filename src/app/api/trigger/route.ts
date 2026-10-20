@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { triggerAPIWorkflow } from "@/inngest/workflows/api-trigger-workflow";
 import { decryptAPIKey } from "@/lib/api-key";
 import prisma from "@/lib/db";
@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
   try {
     keyPayload = decryptAPIKey(apiKey);
   } catch {
-    return NextResponse.json({ error: "Invalid or expired API Key" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid or expired API Key" },
+      { status: 401 },
+    );
   }
   const { userId, workflowId, triggerNodeId } = keyPayload;
 
@@ -31,7 +34,10 @@ export async function POST(req: NextRequest) {
     select: { id: true },
   });
   if (!workflow) {
-    return NextResponse.json({ error: "Invalid or expired API Key" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid or expired API Key" },
+      { status: 401 },
+    );
   }
 
   try {
@@ -41,7 +47,10 @@ export async function POST(req: NextRequest) {
     }
     const body = raw ? JSON.parse(raw) : {};
     const payload =
-      body && typeof body.payload === "object" && body.payload !== null && !Array.isArray(body.payload)
+      body &&
+      typeof body.payload === "object" &&
+      body.payload !== null &&
+      !Array.isArray(body.payload)
         ? body.payload
         : {};
 
@@ -55,10 +64,16 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, result });
   } catch (err) {
-    console.error("API trigger error:", err instanceof Error ? err.message : err);
+    console.error(
+      "API trigger error:",
+      err instanceof Error ? err.message : err,
+    );
     if (err instanceof SyntaxError) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to trigger workflow" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to trigger workflow" },
+      { status: 500 },
+    );
   }
 }

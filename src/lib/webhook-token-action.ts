@@ -1,7 +1,7 @@
 "use server";
 
-import prisma from "@/lib/db";
 import { requireAuth } from "@/lib/auth-utils";
+import prisma from "@/lib/db";
 import { createWebhookToken } from "@/lib/webhook-token";
 
 /** Returns the webhook token only for workflows owned by the signed-in user. */

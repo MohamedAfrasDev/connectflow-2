@@ -1,8 +1,8 @@
 "use server";
 
 import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 import { anthropicChannel } from "@/inngest/channels/anthropic";
+import { inngest } from "@/inngest/client";
 
 export type AnthropicToken = Realtime.Token<
   typeof anthropicChannel,

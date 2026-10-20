@@ -1,54 +1,51 @@
-import { NodeExecutor } from "../types";
-import { manualTriggerExecutor } from "@/features/triggers/components/manual-trigger/executor";
-import { httpRequestExecutor } from "../components/http-request/executor";
-import { googleFormTriggerExecutor } from "@/features/triggers/components/google-form-trigger/executor";
-import { stripeTriggerExecutor } from "@/features/triggers/components/stripe-trigger/executor";
-import { geminiExecutor } from "../components/gemini/executor";
-import { openAIExecutor } from "../components/openai/executor";
-import { anthropicExecutor } from "../components/anthropic/executor";
-import { deepSeekExecutor } from "../components/deepseek/executor";
-import { perplexityExecutor } from "../components/perplexity/executor";
-import { discordExecutor } from "../components/discord/executor";
-import { gmailExecutor } from "../components/gmail/executor";
 import { apiExecutor } from "@/features/triggers/components/api-trigger/executor";
+import { googleFormTriggerExecutor } from "@/features/triggers/components/google-form-trigger/executor";
+import { manualTriggerExecutor } from "@/features/triggers/components/manual-trigger/executor";
+import { stripeTriggerExecutor } from "@/features/triggers/components/stripe-trigger/executor";
+import { NodeType } from "@/generated/prisma";
+import { anthropicExecutor } from "../components/anthropic/executor";
 import { customMailExecutor } from "../components/custom_mail/executor";
+import { deepSeekExecutor } from "../components/deepseek/executor";
+import { discordExecutor } from "../components/discord/executor";
+import { geminiExecutor } from "../components/gemini/executor";
+import { gmailExecutor } from "../components/gmail/executor";
+import { httpRequestExecutor } from "../components/http-request/executor";
 import { instagramExecutor } from "../components/instagram/executor";
 import { lumaExecutor } from "../components/luma/executor";
-import { NodeType } from "@/generated/prisma";
+import { openAIExecutor } from "../components/openai/executor";
+import { perplexityExecutor } from "../components/perplexity/executor";
+import type { NodeExecutor } from "../types";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
-    [NodeType.MANUAL_TRIGGER]:manualTriggerExecutor,
-    [NodeType.INITIAL]:manualTriggerExecutor,
-    [NodeType.HTTP_REQUEST]:httpRequestExecutor, 
-    [NodeType.GOOGLE_FORM_TRIGGER]:googleFormTriggerExecutor,
-    [NodeType.STRIPE_TRIGGER]:stripeTriggerExecutor,
-    [NodeType.GEMINI]:geminiExecutor,
-    [NodeType.ANTHROPIC]:anthropicExecutor,
+  [NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
+  [NodeType.INITIAL]: manualTriggerExecutor,
+  [NodeType.HTTP_REQUEST]: httpRequestExecutor,
+  [NodeType.GOOGLE_FORM_TRIGGER]: googleFormTriggerExecutor,
+  [NodeType.STRIPE_TRIGGER]: stripeTriggerExecutor,
+  [NodeType.GEMINI]: geminiExecutor,
+  [NodeType.ANTHROPIC]: anthropicExecutor,
 
-    [NodeType.OPENAI]:openAIExecutor,
-    [NodeType.DEEPSEEK]:deepSeekExecutor,
-    [NodeType.PERPLEXITY]:perplexityExecutor,
+  [NodeType.OPENAI]: openAIExecutor,
+  [NodeType.DEEPSEEK]: deepSeekExecutor,
+  [NodeType.PERPLEXITY]: perplexityExecutor,
 
-    [NodeType.DISCORD]:discordExecutor,
-    // TODO: Slack uses a different payload format (text/blocks) and its own
-    // incoming-webhook URL scheme.  Replace with a dedicated slackExecutor.
-    [NodeType.SLACK]:discordExecutor,
+  [NodeType.DISCORD]: discordExecutor,
+  // TODO: Slack uses a different payload format (text/blocks) and its own
+  // incoming-webhook URL scheme.  Replace with a dedicated slackExecutor.
+  [NodeType.SLACK]: discordExecutor,
 
-    [NodeType.GMAIL]:gmailExecutor,
-    [NodeType.API]:apiExecutor,
-    [NodeType.CUSTOM_MAIL]:customMailExecutor,
-    [NodeType.INSTAGRAM]:instagramExecutor,
-    [NodeType.LUMA]:lumaExecutor,
-
-
+  [NodeType.GMAIL]: gmailExecutor,
+  [NodeType.API]: apiExecutor,
+  [NodeType.CUSTOM_MAIL]: customMailExecutor,
+  [NodeType.INSTAGRAM]: instagramExecutor,
+  [NodeType.LUMA]: lumaExecutor,
 };
 
-
 export const getExecutor = (type: NodeType): NodeExecutor => {
-    const executor = executorRegistry[type];
-    if(!executor) {
-        throw new Error(`No executor found for node type: ${type}`);
-    }
+  const executor = executorRegistry[type];
+  if (!executor) {
+    throw new Error(`No executor found for node type: ${type}`);
+  }
 
-    return executor;
-}
+  return executor;
+};

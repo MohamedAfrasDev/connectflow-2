@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +17,13 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -24,14 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
-import { useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma";
@@ -46,8 +46,7 @@ const formSchema = z.object({
         "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores",
     }),
   credentialId: z.string().min(1, "Credential is required"),
-  
-  // --- UPDATED THIS FIELD ---
+
   // Allow a string that either includes an "@" (for an email)
   // or Handlebars "{{...}}" (for a variable).
   to: z
@@ -58,10 +57,10 @@ const formSchema = z.object({
       {
         message:
           "Must be a valid email or a Handlebars variable (e.g., {{api.email}})",
-      }
+      },
     ),
   // --- END UPDATE ---
-    
+
   subject: z.string().min(1, "Subject is required"),
   body: z.string().min(1, "Body is required"),
 });
@@ -126,7 +125,10 @@ export const GmailDialog = ({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* VARIABLE NAME */}
             <FormField
               control={form.control}
@@ -161,7 +163,9 @@ export const GmailDialog = ({
                         <Select
                           value={controllerField.value || undefined}
                           onValueChange={controllerField.onChange}
-                          disabled={isLoadingCredentials || !credentials?.length}
+                          disabled={
+                            isLoadingCredentials || !credentials?.length
+                          }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a Credential" />
@@ -169,7 +173,10 @@ export const GmailDialog = ({
                           <SelectContent>
                             {credentials && credentials.length > 0 ? (
                               credentials.map((credential) => (
-                                <SelectItem key={credential.id} value={credential.id}>
+                                <SelectItem
+                                  key={credential.id}
+                                  value={credential.id}
+                                >
                                   <div className="flex items-center gap-2">
                                     <Image
                                       src="/logos/gmail.svg"
@@ -205,9 +212,11 @@ export const GmailDialog = ({
                   <FormLabel>To Email</FormLabel>
                   <FormControl>
                     {/* --- UPDATED PLACEHOLDER --- */}
-                    <Input placeholder="receiver@example.com or {{api.email}}" {...field} />
+                    <Input
+                      placeholder="receiver@example.com or {{api.email}}"
+                      {...field}
+                    />
                   </FormControl>
-                  {/* --- ADDED DESCRIPTION --- */}
                   <FormDescription>
                     Supports Handlebars variables: {`{{variableName.property}}`}
                   </FormDescription>
@@ -226,7 +235,7 @@ export const GmailDialog = ({
                   <FormControl>
                     <Input placeholder="Your order is confirmed" {...field} />
                   </FormControl>
-                   <FormDescription>
+                  <FormDescription>
                     Supports Handlebars variables: {`{{variableName.property}}`}
                   </FormDescription>
                   <FormMessage />

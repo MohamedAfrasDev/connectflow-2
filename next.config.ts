@@ -1,15 +1,16 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+
 const nextConfig: NextConfig = {
   devIndicators: false,
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
-  output: 'standalone',
+  output: "standalone",
 
   outputFileTracingIncludes: {
-    '/api/**/*': ['./node_modules/.prisma/client/**/*'],
-    '/*': ['./node_modules/.prisma/client/**/*'],
+    "/api/**/*": ["./node_modules/.prisma/client/**/*"],
+    "/*": ["./node_modules/.prisma/client/**/*"],
   },
   async headers() {
     return [
@@ -19,8 +20,14 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
         ],
       },
     ];
@@ -31,9 +38,9 @@ const nextConfig: NextConfig = {
         source: "/",
         destination: "/workflows",
         permanent: false,
-      }
-    ]
-  }
+      },
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {
@@ -66,5 +73,5 @@ export default withSentryConfig(nextConfig, {
   // See the following for more information:
   // https://docs.sentry.io/product/crons/
   // https://vercel.com/docs/cron-jobs
-  automaticVercelMonitors: true
+  automaticVercelMonitors: true,
 });

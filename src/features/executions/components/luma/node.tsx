@@ -1,79 +1,80 @@
 "use client";
 
-import { Node, NodeProps, useReactFlow } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
-import { BaseExecutionNode } from "../base-execution-node";
-import { useNodeStatus } from "../../hooks/use-node-status";
 import { LUMA_CHANNEL_NAME } from "@/inngest/channels/luma";
+import { useNodeStatus } from "../../hooks/use-node-status";
+import { BaseExecutionNode } from "../base-execution-node";
 import { fetchLumaRealtimeToken } from "./action";
-import { LumaFormValues, LumaDialog } from "./dialog";
+import { LumaDialog, type LumaFormValues } from "./dialog";
 
 type LumaNodeData = {
-    variableName?: string;
-    apiCredentialId?: string;
-    imagePrompt?: string;
-    imageCount?: string;
-    imageSize?: string;
+  variableName?: string;
+  apiCredentialId?: string;
+  imagePrompt?: string;
+  imageCount?: string;
+  imageSize?: string;
 };
 
 type LumaNodeType = Node<LumaNodeData>;
 
 export const LumaNode = memo((props: NodeProps<LumaNodeType>) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const nodeStatus = useNodeStatus({
+    nodeId: props.id,
+    channel: LUMA_CHANNEL_NAME,
+    topic: "status",
+    refreshToken: fetchLumaRealtimeToken,
+  });
+  const { setNodes } = useReactFlow();
 
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const nodeStatus = useNodeStatus({
-        nodeId: props.id,
-        channel: LUMA_CHANNEL_NAME,
-        topic: "status",
-        refreshToken: fetchLumaRealtimeToken
-    });
-    const { setNodes } = useReactFlow();
-
-    const handleSubmit = (values: LumaFormValues) => {
-        setNodes((nodes) => nodes.map((node) => {
-            if (node.id === props.id) {
-                return {
-                    ...node,
-                    data: {
-                        ...node.data,
-                        variableName: values.variableName,
-                        apiCredentialId: values.apiCredentialId,
-                        imagePrompt: values.imagePrompt,
-                        imageCount: values.imageCount,
-                        imageSize: values.imageSize,
-                    }
-                };
-            }
-            return node;
-        }));
-    };
-
-    const handleOpenSettings = () => setDialogOpen(true);
-    const nodeData = props.data;
-    const description = nodeData?.imagePrompt
-        ? `Generate: ${nodeData.imagePrompt.slice(0, 50)}...`
-        : "Not configured";
-
-    return (
-        <>
-            <LumaDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                onSubmit={handleSubmit}
-                defaultValues={nodeData}
-            />
-            <BaseExecutionNode
-                {...props}
-                id={props.id}
-                icon="/logos/luma.svg"
-                name="Luma"
-                status={nodeStatus}
-                description={description}
-                onSettings={handleOpenSettings}
-                onDoubleClick={handleOpenSettings}
-            />
-        </>
+  const handleSubmit = (values: LumaFormValues) => {
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === props.id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              variableName: values.variableName,
+              apiCredentialId: values.apiCredentialId,
+              imagePrompt: values.imagePrompt,
+              imageCount: values.imageCount,
+              imageSize: values.imageSize,
+            },
+          };
+        }
+        return node;
+      }),
     );
+  };
+
+  const handleOpenSettings = () => setDialogOpen(true);
+  const nodeData = props.data;
+  const description = nodeData?.imagePrompt
+    ? `Generate: ${nodeData.imagePrompt.slice(0, 50)}...`
+    : "Not configured";
+
+  return (
+    <>
+      <LumaDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSubmit={handleSubmit}
+        defaultValues={nodeData}
+      />
+      <BaseExecutionNode
+        {...props}
+        id={props.id}
+        icon="/logos/luma.svg"
+        name="Luma"
+        status={nodeStatus}
+        description={description}
+        onSettings={handleOpenSettings}
+        onDoubleClick={handleOpenSettings}
+      />
+    </>
+  );
 });
 
 LumaNode.displayName = "LumaNode";

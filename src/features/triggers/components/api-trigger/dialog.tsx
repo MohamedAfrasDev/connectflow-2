@@ -1,8 +1,9 @@
 "use client";
 
+import { Check, Copy, Terminal } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Copy, Check, Terminal, Key } from "lucide-react";
-import { useParams } from "next/navigation"; 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAPITriggerKey } from "./action"; 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getAPITriggerKey } from "./action";
 
 interface Props {
   open: boolean;
@@ -49,10 +49,13 @@ export const APITriggerDialog = ({ open, onOpenChange, nodeId }: Props) => {
 
   // ⚠️ STANDARD cURL FORMAT (Clean & Vertical)
   // We use a placeholder for the key to keep the code box small.
-  const apiUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/trigger` : '/api/trigger';
-  
+  const apiUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/api/trigger`
+      : "/api/trigger";
+
   const curlCode = `curl -X POST "${apiUrl}" \\
-  -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}" \\
+  -H "Authorization: Bearer ${apiKey || "YOUR_API_KEY"}" \\
   -H "Content-Type: application/json" \\
   -d '{
     "payload": {
@@ -85,53 +88,62 @@ export const APITriggerDialog = ({ open, onOpenChange, nodeId }: Props) => {
             <div className="space-y-2">
               <Label>Your Secret API Key</Label>
               <div className="flex items-center space-x-2">
-                <Input 
-                  value={loading ? "Generating..." : apiKey} 
-                  readOnly 
-                  className="font-mono text-xs bg-slate-50" 
+                <Input
+                  value={loading ? "Generating..." : apiKey}
+                  readOnly
+                  className="font-mono text-xs bg-slate-50"
                 />
-                <Button 
-                  size="icon" 
-                  variant="outline" 
+                <Button
+                  size="icon"
+                  variant="outline"
                   onClick={() => handleCopy(apiKey)}
                   disabled={loading}
                 >
-                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
               <p className="text-[0.8rem] text-muted-foreground">
-                This key authenticates your request and identifies this specific workflow node.
+                This key authenticates your request and identifies this specific
+                workflow node.
               </p>
             </div>
-          <div>
-          Use this name to reference the result in other nodes:
-                    <span className="font-mono ml-1 text-sm text-primary">
-                      {`{{api.apiCall.email}}`}
-                    </span>
-          </div>
+            <div>
+              Use this name to reference the result in other nodes:
+              <span className="font-mono ml-1 text-sm text-primary">
+                {`{{api.apiCall.email}}`}
+              </span>
+            </div>
           </TabsContent>
 
           {/* --- TAB 2: cURL CODE --- */}
           <TabsContent value="code" className="py-4">
             <div className="relative rounded-md bg-slate-950 p-4 group">
               <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
+                <Button
+                  size="icon"
+                  variant="ghost"
                   className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
                   onClick={() => handleCopy(curlCode)}
                 >
-                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
-              
+
               {/* This displays the clean vertical cURL command */}
               <pre className="whitespace-pre-wrap break-all text-xs text-slate-50 font-mono leading-relaxed">
                 <code>{curlCode}</code>
               </pre>
             </div>
             <div className="mt-2 text-[0.8rem] text-muted-foreground">
-               Run this command in your terminal to test the trigger immediately.
+              Run this command in your terminal to test the trigger immediately.
             </div>
           </TabsContent>
         </Tabs>

@@ -1,13 +1,13 @@
 // node.tsx
 "use client";
 
-import { Node, NodeProps, useReactFlow } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
-import { BaseExecutionNode } from "../base-execution-node";
-import { InstagramDialog, InstagramFormValues } from "./dialog";
-import { useNodeStatus } from "../../hooks/use-node-status";
-import { fetchInstagramRealtimeToken } from "./action";
 import { INSTAGRAM_CHANNEL_NAME } from "@/inngest/channels/instagram";
+import { useNodeStatus } from "../../hooks/use-node-status";
+import { BaseExecutionNode } from "../base-execution-node";
+import { fetchInstagramRealtimeToken } from "./action";
+import { InstagramDialog, type InstagramFormValues } from "./dialog";
 
 type InstagramNodeData = {
   credentialId?: string;
@@ -47,13 +47,15 @@ export const InstagramNode = memo((props: NodeProps<InstagramNodeType>) => {
           };
         }
         return node;
-      })
+      }),
     );
   };
 
   const handleOpenSettings = () => setDialogOpen(true);
   const nodeData = props.data;
-  const description = nodeData?.caption ? `Caption: ${nodeData.caption.slice(0, 50)}...` : "Not configured";
+  const description = nodeData?.caption
+    ? `Caption: ${nodeData.caption.slice(0, 50)}...`
+    : "Not configured";
 
   return (
     <>

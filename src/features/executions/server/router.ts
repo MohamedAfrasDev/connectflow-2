@@ -1,14 +1,7 @@
-import { PAGINATION } from "@/config/constants";
-// Edge and Node are not used in this file, so they can be removed if you wish
-// import { Edge, Node } from "@xyflow/react"; 
-import prisma from "@/lib/db";
-import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
-// generateSlug is not used, can be removed
-// import { generateSlug } from "random-word-slugs"; 
 import z from "zod";
-// 'email' is not used directly, can be removed
-// import { email } from "zod";
-
+import { PAGINATION } from "@/config/constants";
+import prisma from "@/lib/db";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 
 export const executionsRouter = createTRPCRouter({
   getOne: protectedProcedure
@@ -16,18 +9,16 @@ export const executionsRouter = createTRPCRouter({
     .query(({ ctx, input }) => {
       return prisma.execution.findFirst({
         where: { id: input.id, workflow: { userId: ctx.auth.user.id } },
-       include: {
-        workflow: {
-          select: {
-            id: true,
-            name: true,
-          }
-        }
-       }
-
+        include: {
+          workflow: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
     }),
-
 
   getMany: protectedProcedure
     .input(
@@ -38,7 +29,7 @@ export const executionsRouter = createTRPCRouter({
           .min(PAGINATION.MIN_PAGE_SIZE)
           .max(PAGINATION.MAX_PAGE_SIZE)
           .default(PAGINATION.DEFAULT_PAGE_SIZE),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { page, pageSize } = input;
@@ -48,7 +39,6 @@ export const executionsRouter = createTRPCRouter({
           take: pageSize,
           where: {
             workflow: { userId: ctx.auth.user.id },
-
           },
           orderBy: { startedAt: "desc" },
           include: {
@@ -56,17 +46,16 @@ export const executionsRouter = createTRPCRouter({
               select: {
                 id: true,
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         }),
         prisma.execution.count({
           where: {
-            workflow: { userId: ctx.auth.user.id, }
-
-          }
-        })
-      ])
+            workflow: { userId: ctx.auth.user.id },
+          },
+        }),
+      ]);
       const totalPages = Math.ceil(totalCount / pageSize);
       const hasNextPage = page < totalPages;
       const hasPreviousPage = page > 1;
@@ -79,8 +68,6 @@ export const executionsRouter = createTRPCRouter({
         totalPages,
         hasNextPage,
         hasPreviousPage,
-      }
+      };
     }),
-
-
-})
+});

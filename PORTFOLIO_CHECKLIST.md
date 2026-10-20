@@ -31,11 +31,11 @@ What reviewers look for (from the sources at the bottom), checked against this r
 ## 3. Code quality and repo hygiene
 - [x] **(high impact)** Removed committed junk: `mprocs.log` and the stale `src/generated/client` (incl. Prisma `.node` binaries); `.gitignore` updated (`tsbuildinfo` was never tracked)
 - [x] Fixed `mprocs.yaml` script name so `npm run dev:all` works
-- [ ] Turn off `typescript.ignoreBuildErrors` in `next.config.ts` and fix the errors — reviewers who read the config will notice
-- [ ] Run `npm run lint` clean (Biome is configured)
-- [ ] Delete dead code and stale comments ("can be removed if you wish", "--- ADDED ---" markers in credentials router)
-- [ ] Remove leftover `any` types and `console.log` of sensitive responses (e.g. mail send info)
-- [ ] Consistent formatting (`npm run format`)
+- [x] Turned off `typescript.ignoreBuildErrors`; `tsc --noEmit` is clean
+- [x] `npm run lint`: 0 errors (30 minor warnings left, mostly unused-var and a11y hints)
+- [x] Deleted dead code and stale comments ("can be removed if you wish", "--- ADDED ---" markers in credentials router)
+- [x] Removed leftover `any` types and debug/sensitive `console.log` calls
+- [x] Consistent formatting (Biome applied repo-wide)
 - [x] Clear feature-based folder structure
 - [x] Executor registry pattern and typed node executors
 

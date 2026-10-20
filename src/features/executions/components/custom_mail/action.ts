@@ -1,8 +1,8 @@
 "use server";
 
 import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 import { customMailChannel } from "@/inngest/channels/custom_mail";
+import { inngest } from "@/inngest/client";
 
 export type CustomMailToken = Realtime.Token<
   typeof customMailChannel,

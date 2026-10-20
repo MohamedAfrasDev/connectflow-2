@@ -15,13 +15,12 @@ export const apiExecutor: NodeExecutor<APITriggerData> = async ({
 
   // 2. Run executor
   const result = await step.run("process-api-payload", async () => {
-    const api = (context as any).api ?? {};
+    const api = (context as { api?: unknown }).api ?? {};
     const key = data.variableName || "apiCall";
 
     // Wrap apiCall inside api
     return {
       api: {
-       
         [key]: api,
       },
     };

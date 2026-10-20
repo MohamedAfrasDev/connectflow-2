@@ -1,9 +1,7 @@
-
 "use client"; // <-- ADD THIS LINE
 import { useQueryStates } from "nuqs";
 import { executionParams } from "../params";
 
 export const useExecutionParams = () => {
-
-    return useQueryStates(executionParams);
-}
+  return useQueryStates(executionParams);
+};

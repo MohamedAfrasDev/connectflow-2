@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
+import z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
 import {
   Form,
   FormControl,
@@ -18,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -26,14 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   variableName: z
@@ -44,8 +42,7 @@ const formSchema = z.object({
         "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores",
     }),
 
-  endpoint: z.string()
-  .min(1, { message: "Please enter a valid URL" }),
+  endpoint: z.string().min(1, { message: "Please enter a valid URL" }),
 
   method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
@@ -87,7 +84,7 @@ export const HttpRequestDialog = ({
         body: defaultValues.body || "",
       });
     }
-  }, [open, defaultValues]);
+  }, [open, defaultValues, form]);
 
   const method = form.watch("method");
   const varPreview = form.watch("variableName") || "myApiCall";
@@ -110,8 +107,10 @@ export const HttpRequestDialog = ({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* VARIABLE NAME */}
             <FormField
               control={form.control}

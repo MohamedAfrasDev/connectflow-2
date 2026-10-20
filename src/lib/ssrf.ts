@@ -41,13 +41,18 @@ function isPrivateIP(ip: string): boolean {
  */
 export async function assertPublicHost(hostname: string): Promise<void> {
   const host = hostname.replace(/^\[|\]$/g, "");
-  if (host.toLowerCase() === "localhost" || host.toLowerCase().endsWith(".localhost")) {
+  if (
+    host.toLowerCase() === "localhost" ||
+    host.toLowerCase().endsWith(".localhost")
+  ) {
     throw new Error("Requests to internal hosts are not allowed.");
   }
   const addresses = net.isIP(host)
     ? [{ address: host }]
     : await dns.lookup(host, { all: true });
   if (addresses.length === 0 || addresses.some((a) => isPrivateIP(a.address))) {
-    throw new Error("Requests to internal or private addresses are not allowed.");
+    throw new Error(
+      "Requests to internal or private addresses are not allowed.",
+    );
   }
 }

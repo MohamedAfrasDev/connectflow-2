@@ -1,12 +1,12 @@
 "use client";
 
-import { Node, NodeProps, useReactFlow } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
-import { BaseExecutionNode } from "../base-execution-node";
-import { useNodeStatus } from "../../hooks/use-node-status";
 import { GMAIL_CHANNEL_NAME } from "@/inngest/channels/gmail";
+import { useNodeStatus } from "../../hooks/use-node-status";
+import { BaseExecutionNode } from "../base-execution-node";
 import { fetchGmailRealtimeToken } from "./action";
-import { GmailDialog, GmailFormValues } from "./dialog";
+import { GmailDialog, type GmailFormValues } from "./dialog";
 
 type GmailNodeData = {
   variableName?: string;
@@ -47,7 +47,7 @@ export const GmailNode = memo((props: NodeProps<GmailNodeType>) => {
           };
         }
         return node;
-      })
+      }),
     );
   };
 

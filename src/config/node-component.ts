@@ -16,29 +16,27 @@ import { ManualTriggerNode } from "@/features/triggers/components/manual-trigger
 import { StripeTriggerNode } from "@/features/triggers/components/stripe-trigger/node";
 import { NodeType } from "@/generated/prisma";
 
-
 export const nodeComponent = {
-    [NodeType.INITIAL]: InitialNode,
-    [NodeType.HTTP_REQUEST]: HttpRequestNode,
-   [NodeType.MANUAL_TRIGGER]: ManualTriggerNode,
-   [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTrigger,
-   [NodeType.STRIPE_TRIGGER]: StripeTriggerNode,
-   [NodeType.GEMINI]: GeminiNode,
-   [NodeType.OPENAI]: OpenAINode,
+  [NodeType.INITIAL]: InitialNode,
+  [NodeType.HTTP_REQUEST]: HttpRequestNode,
+  [NodeType.MANUAL_TRIGGER]: ManualTriggerNode,
+  [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTrigger,
+  [NodeType.STRIPE_TRIGGER]: StripeTriggerNode,
+  [NodeType.GEMINI]: GeminiNode,
+  [NodeType.OPENAI]: OpenAINode,
 
-   [NodeType.ANTHROPIC]: AnthropicNode,
-   [NodeType.DEEPSEEK]: DeepSeekNode,
+  [NodeType.ANTHROPIC]: AnthropicNode,
+  [NodeType.DEEPSEEK]: DeepSeekNode,
 
-   [NodeType.PERPLEXITY]: PerlexityNode,
-   [NodeType.DISCORD]: DiscordNode,
-   [NodeType.GMAIL]: GmailNode,
+  [NodeType.PERPLEXITY]: PerlexityNode,
+  [NodeType.DISCORD]: DiscordNode,
+  [NodeType.GMAIL]: GmailNode,
 
-   [NodeType.API]: APITriggerNode,
+  [NodeType.API]: APITriggerNode,
 
-   [NodeType.CUSTOM_MAIL]: CustomMailNode,
-   [NodeType.INSTAGRAM]: InstagramNode,
-   [NodeType.LUMA]: LumaNode,
-
+  [NodeType.CUSTOM_MAIL]: CustomMailNode,
+  [NodeType.INSTAGRAM]: InstagramNode,
+  [NodeType.LUMA]: LumaNode,
 } as const;
 
 export type RegisteredNodeType = keyof typeof nodeComponent;

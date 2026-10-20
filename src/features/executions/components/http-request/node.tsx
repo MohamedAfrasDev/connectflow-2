@@ -1,89 +1,85 @@
 "use client";
 
-import { Node, NodeProps, useReactFlow } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import { GlobeIcon } from "lucide-react";
 import { memo, useState } from "react";
-import { BaseExecutionNode } from "../base-execution-node";
-import { HttpRequestDialog } from "./dialog";
+import { HTTP_REQUEST_CHANNEL_NAME } from "@/inngest/channels/http-request";
 import { useNodeStatus } from "../../hooks/use-node-status";
-import  { HTTP_REQUEST_CHANNEL_NAME } from "@/inngest/channels/http-request";
+import { BaseExecutionNode } from "../base-execution-node";
 import { fetchHttpRequestRealtimeToken } from "./action";
+import { HttpRequestDialog } from "./dialog";
 
 type HttpRequestNodeData = {
-    endpoint?: string;   // FIXED
-    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    body?: string;
-    [key: string]: unknown;
+  endpoint?: string; // FIXED
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  body?: string;
+  [key: string]: unknown;
 };
 
 type HttpRequestNodeType = Node<HttpRequestNodeData>;
 
 export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const nodeStatus = useNodeStatus({
+    nodeId: props.id,
+    channel: HTTP_REQUEST_CHANNEL_NAME,
+    topic: "status",
+    refreshToken: fetchHttpRequestRealtimeToken,
+  });
+  const { setNodes } = useReactFlow();
 
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const nodeStatus = useNodeStatus({
-        nodeId: props.id,
-        channel: HTTP_REQUEST_CHANNEL_NAME,
-        topic: "status",
-        refreshToken: fetchHttpRequestRealtimeToken
-    })
-    const { setNodes } = useReactFlow();
+  const handleSubmit = (values: {
+    variableName?: string;
+    endpoint: string;
+    method: string;
+    body?: string;
+  }) => {
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === props.id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              variableName: values.variableName, // <<< REQUIRED
 
-    const handleSubmit = (values: {
-        variableName?: string;
-        endpoint: string;
-        method: string;
-        body?: string;
-    }) => {
-        setNodes((nodes) => nodes.map((node) => {
-            if (node.id === props.id) {
-                return {
-                    ...node,
-                    data: {
-                        ...node.data,
-                        variableName: values.variableName,   // <<< REQUIRED
-
-                        endpoint: values.endpoint,
-                        method: values.method,
-                        body: values.body
-                    }
-                }
-            }
-            return node;
-        }))
-    }
-
-
-    const handleOpenSettings = () => setDialogOpen(true);
-    const nodeData = props.data;
-    const description = nodeData?.endpoint
-        ? `${nodeData.method || "GET"}: ${nodeData.endpoint}`
-        : "Not configured";
-
-
-
-    return (
-        <>
-
-            <HttpRequestDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                onSubmit={handleSubmit}
-                defaultValues={nodeData}
-
-            />
-            <BaseExecutionNode
-                {...props}
-                id={props.id}
-                icon={GlobeIcon}
-                name="HTTP Request"
-                status={nodeStatus}
-                description={description}
-                onSettings={handleOpenSettings}
-                onDoubleClick={handleOpenSettings}
-            />
-        </>
+              endpoint: values.endpoint,
+              method: values.method,
+              body: values.body,
+            },
+          };
+        }
+        return node;
+      }),
     );
+  };
+
+  const handleOpenSettings = () => setDialogOpen(true);
+  const nodeData = props.data;
+  const description = nodeData?.endpoint
+    ? `${nodeData.method || "GET"}: ${nodeData.endpoint}`
+    : "Not configured";
+
+  return (
+    <>
+      <HttpRequestDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSubmit={handleSubmit}
+        defaultValues={nodeData}
+      />
+      <BaseExecutionNode
+        {...props}
+        id={props.id}
+        icon={GlobeIcon}
+        name="HTTP Request"
+        status={nodeStatus}
+        description={description}
+        onSettings={handleOpenSettings}
+        onDoubleClick={handleOpenSettings}
+      />
+    </>
+  );
 });
 
 HttpRequestNode.displayName = "HttpRequestNode";

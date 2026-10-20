@@ -1,23 +1,20 @@
 "use server";
 
 import { getSubscriptionToken } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 // 👇 Import the OBJECT (apiTriggerChannel), NOT just the name
 import { apiTriggerChannel } from "@/inngest/channels/api-trigger";
+import { inngest } from "@/inngest/client";
 
 export async function fetchAPITriggerRealtimeToken() {
   return getSubscriptionToken(inngest, {
     channel: apiTriggerChannel(), // ✅ FIX: Call the function () // Pass the channel name string, not the object
-    topics: ["status"],              // This must match the defined topic
+    topics: ["status"], // This must match the defined topic
   });
 }
 
-
-
-
 import { generateAPIKey } from "@/lib/api-key"; // The encryption helper we wrote previously
-import prisma from "@/lib/db";
 import { requireAuth } from "@/lib/auth-utils";
+import prisma from "@/lib/db";
 
 export const getAPITriggerKey = async (workflowId: string, nodeId: string) => {
   // 1. Verify User
@@ -28,7 +25,11 @@ export const getAPITriggerKey = async (workflowId: string, nodeId: string) => {
 
   // 2. Make sure the workflow (and trigger node) belongs to this user
   const workflow = await prisma.workflow.findFirst({
-    where: { id: workflowId, userId: session.user.id, nodes: { some: { id: nodeId } } },
+    where: {
+      id: workflowId,
+      userId: session.user.id,
+      nodes: { some: { id: nodeId } },
+    },
     select: { id: true },
   });
   if (!workflow) {

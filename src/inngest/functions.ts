@@ -1,24 +1,24 @@
 import { NonRetriableError } from "inngest";
-import { inngest } from "./client";
-import prisma from "@/lib/db";
-import { topologicalSort } from "./utils";
-import { ExecutionStatus, NodeType } from "@/generated/prisma";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
-import { httpRequestChannel } from "./channels/http-request";
-import { manualTriggerChannel } from "./channels/manual-trigger";
-import { googleFormTriggerChannel } from "./channels/google-form-trigger";
-import { stripeTriggerChannel } from "./channels/stripe-trigger";
-import { geminiChannel } from "./channels/gemini";
-import { openAIChannel } from "./channels/openai";
+import { ExecutionStatus, type NodeType } from "@/generated/prisma";
+import prisma from "@/lib/db";
 import { anthropicChannel } from "./channels/anthropic";
-import { deepSeekChannel } from "./channels/deepseek";
-import { perplexityChannel } from "./channels/perplexity";
-import { discordChannel } from "./channels/discord";
-import { gmailChannel } from "./channels/gmail";
 import { apiTriggerChannel } from "./channels/api-trigger";
 import { customMailChannel } from "./channels/custom_mail";
+import { deepSeekChannel } from "./channels/deepseek";
+import { discordChannel } from "./channels/discord";
+import { geminiChannel } from "./channels/gemini";
+import { gmailChannel } from "./channels/gmail";
+import { googleFormTriggerChannel } from "./channels/google-form-trigger";
+import { httpRequestChannel } from "./channels/http-request";
 import { instagramChannel } from "./channels/instagram";
 import { lumaChannel } from "./channels/luma";
+import { manualTriggerChannel } from "./channels/manual-trigger";
+import { openAIChannel } from "./channels/openai";
+import { perplexityChannel } from "./channels/perplexity";
+import { stripeTriggerChannel } from "./channels/stripe-trigger";
+import { inngest } from "./client";
+import { topologicalSort } from "./utils";
 
 export const executeWorkflow = inngest.createFunction(
   {
@@ -80,22 +80,26 @@ export const executeWorkflow = inngest.createFunction(
     });
 
     // 2️⃣ Load workflow once: sort nodes topologically and extract userId together
-    const { sortedNodes, userId } = await step.run("prepare-workflow", async () => {
-      const workflow = await prisma.workflow.findUniqueOrThrow({
-        where: { id: workflowId },
-        include: {
-          nodes: true,
-          connections: true,
-        },
-      });
+    const { sortedNodes, userId } = await step.run(
+      "prepare-workflow",
+      async () => {
+        const workflow = await prisma.workflow.findUniqueOrThrow({
+          where: { id: workflowId },
+          include: {
+            nodes: true,
+            connections: true,
+          },
+        });
 
-      return {
-        sortedNodes: topologicalSort(workflow.nodes, workflow.connections),
-        userId: workflow.userId,
-      };
-    });
+        return {
+          sortedNodes: topologicalSort(workflow.nodes, workflow.connections),
+          userId: workflow.userId,
+        };
+      },
+    );
 
     // 3️⃣ Build execution context
+    // biome-ignore lint/suspicious/noExplicitAny: context is arbitrary JSON shared between node executors
     let context: Record<string, any> = { ...(event.data.initialData ?? {}) };
     if (event.data.api && Object.keys(event.data.api).length) {
       context.api = event.data.api;
@@ -125,5 +129,5 @@ export const executeWorkflow = inngest.createFunction(
         },
       });
     });
-  }
+  },
 );

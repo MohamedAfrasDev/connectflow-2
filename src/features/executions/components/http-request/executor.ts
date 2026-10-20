@@ -1,10 +1,9 @@
-import type { NodeExecutor } from "@/features/executions/types";
+import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
-
-import Handlebars from "handlebars";
-import { assertPublicHost } from "@/lib/ssrf";
+import type { NodeExecutor } from "@/features/executions/types";
 import { httpRequestChannel } from "@/inngest/channels/http-request";
+import { assertPublicHost } from "@/lib/ssrf";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -29,26 +28,27 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
 
   await send("loading");
 
-
   try {
     const result = await step.run("http-request", async () => {
       if (!data.endpoint?.trim()) {
         await send("error");
         throw new NonRetriableError(
-          "HTTP Request node: No endpoint configured (empty string)."
+          "HTTP Request node: No endpoint configured (empty string).",
         );
       }
-    
+
       if (!data.variableName) {
         await send("error");
-        throw new NonRetriableError("HTTP Request node: Variable name missing.");
+        throw new NonRetriableError(
+          "HTTP Request node: Variable name missing.",
+        );
       }
-    
+
       if (!data.method) {
         await send("error");
         throw new NonRetriableError("HTTP Request node: HTTP method missing.");
       }
-    
+
       // ---------- HANDLEBARS RESOLUTION ----------
       const interpolate = (template: string) => {
         const compiled = Handlebars.compile(template);
@@ -57,23 +57,22 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
         if (!output || output.trim() === "") {
           throw new NonRetriableError(
             `Template resolved to empty string:\n${template}\n` +
-              `→ Missing variable in context?`
+              `→ Missing variable in context?`,
           );
         }
 
         return output;
       };
 
-      let endpoint = interpolate(data.endpoint);
+      const endpoint = interpolate(data.endpoint);
 
       // ---------- RELATIVE URL FIX ----------
-     // ⛔ If endpoint is NOT a valid URL, throw clean error
-if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
-  throw new NonRetriableError(
-    `Invalid URL: "${endpoint}". Please enter a valid absolute URL (starting with http:// or https://).`
-  );
-}
-
+      // ⛔ If endpoint is NOT a valid URL, throw clean error
+      if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+        throw new NonRetriableError(
+          `Invalid URL: "${endpoint}". Please enter a valid absolute URL (starting with http:// or https://).`,
+        );
+      }
 
       // Final absolute URL check
       let parsedUrl: URL;
@@ -81,7 +80,7 @@ if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
         parsedUrl = new URL(endpoint);
       } catch {
         throw new NonRetriableError(
-          `Invalid final URL: "${endpoint}" (after template resolution)`
+          `Invalid final URL: "${endpoint}" (after template resolution)`,
         );
       }
 
@@ -90,13 +89,17 @@ if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
         await assertPublicHost(parsedUrl.hostname);
       } catch (e) {
         throw new NonRetriableError(
-          `HTTP Request node: ${e instanceof Error ? e.message : "blocked host"}`
+          `HTTP Request node: ${e instanceof Error ? e.message : "blocked host"}`,
         );
       }
 
       const method = data.method;
       // redirects are not followed so a public URL cannot bounce to an internal one
-      const options: KyOptions = { method, redirect: "manual", timeout: 30_000 };
+      const options: KyOptions = {
+        method,
+        redirect: "manual",
+        timeout: 30_000,
+      };
 
       // ---------- BODY HANDLING ----------
       if (["POST", "PUT", "PATCH"].includes(method) && data.body) {
@@ -106,7 +109,7 @@ if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
           JSON.parse(resolvedBody);
         } catch {
           throw new NonRetriableError(
-            `Request body is not valid JSON:\n${resolvedBody}`
+            `Request body is not valid JSON:\n${resolvedBody}`,
           );
         }
 

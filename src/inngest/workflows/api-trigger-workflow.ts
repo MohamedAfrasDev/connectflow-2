@@ -24,9 +24,8 @@ export async function triggerAPIWorkflow(data: APITriggerData) {
       },
     });
 
-    console.log("Event sent to Inngest:", result);
     return result;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Failed to trigger workflow:", err);
     throw err;
   }

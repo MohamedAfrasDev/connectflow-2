@@ -1,9 +1,9 @@
-import type { NodeExecutor } from "@/features/executions/types";
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
+import nodemailer, { type SentMessageInfo } from "nodemailer";
+import type { NodeExecutor } from "@/features/executions/types";
 import { gmailChannel } from "@/inngest/channels/gmail";
 import prisma from "@/lib/db";
-import nodemailer, { SentMessageInfo } from "nodemailer";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -94,8 +94,10 @@ export const gmailExecutor: NodeExecutor<GmailData> = async ({
         to: compiledTo,
       },
     };
-  } catch (error: any) {
+  } catch (error) {
     await publish(gmailChannel().status({ nodeId, status: "error" }));
-    throw new NonRetriableError(error.message || "Gmail send failed");
+    throw new NonRetriableError(
+      error instanceof Error ? error.message : "Gmail send failed",
+    );
   }
 };

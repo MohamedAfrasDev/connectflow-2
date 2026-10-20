@@ -1,39 +1,37 @@
-import { forwardRef, type ComponentProps, type HTMLAttributes } from "react";
-
-import { cn } from "@/lib/utils";
-import { NodeStatus } from "./node-status-indicator";
 import { CheckCircle2Icon, Loader2Icon, XCircle } from "lucide-react";
+import { type ComponentProps, forwardRef, type HTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
+import type { NodeStatus } from "./node-status-indicator";
 
 interface BaseNodeProps extends HTMLAttributes<HTMLDivElement> {
   status?: NodeStatus;
 }
 
-export const BaseNode = forwardRef<
-HTMLDivElement,
-BaseNodeProps>(({className,status, ...props}, ref) => (
+export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
+  ({ className, status, ...props }, ref) => (
     <div
-    ref={ref}
+      ref={ref}
       className={cn(
-      "relative rounded-sm border border-muted-foreground bg-white text-card-foreground hover:bg-accent",
+        "relative rounded-sm border border-muted-foreground bg-white text-card-foreground hover:bg-accent",
         className,
       )}
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: React Flow nodes must be keyboard focusable
       tabIndex={0}
       {...props}
-   
     >
       {props.children}
       {status === "error" && (
-        <XCircle className="absolute right-0.5 bottom-0.5 size-2 text-red-700 stroke-3"/>
+        <XCircle className="absolute right-0.5 bottom-0.5 size-2 text-red-700 stroke-3" />
       )}
       {status === "success" && (
-        <CheckCircle2Icon className="absolute right-0.5 bottom-0.5 size-2 text-green-700 stroke-3"/>
+        <CheckCircle2Icon className="absolute right-0.5 bottom-0.5 size-2 text-green-700 stroke-3" />
       )}
       {status === "loading" && (
-        <Loader2Icon className="absolute -right-0.5 -bottom-0.5 size-2 text-blue-700 stroke-3 animate-spin"/>
+        <Loader2Icon className="absolute -right-0.5 -bottom-0.5 size-2 text-blue-700 stroke-3 animate-spin" />
       )}
     </div>
-  )
-) 
+  ),
+);
 
 /**
  * A container for a consistent header layout intended to be used inside the

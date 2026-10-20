@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   CreditCardIcon,
   FolderOpenIcon,
@@ -9,6 +10,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,11 +22,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-import { authClient } from "@/lib/auth-client";
 import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscription";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
 
 const menuItems = [
   {
@@ -64,10 +63,13 @@ export const AppSidebar = () => {
     await authClient.checkout({ slug: "pro" });
 
     // Optimistically mark subscription active for immediate UI feedback
-    queryClient.setQueryData(["subscription"], (old: any) => ({
-      ...old,
-      activeSubscriptions: [{ id: "pro", status: "active" }],
-    }));
+    queryClient.setQueryData(
+      ["subscription"],
+      (old: Record<string, unknown> | undefined) => ({
+        ...old,
+        activeSubscriptions: [{ id: "pro", status: "active" }],
+      }),
+    );
 
     // Refetch to sync with backend after a few seconds
     setTimeout(() => refetch(), 3000);
@@ -86,7 +88,12 @@ export const AppSidebar = () => {
         <SidebarMenuItem>
           <SidebarMenuButton asChild className="gap-x-4 h-10 px-4">
             <Link href="/workflows" prefetch>
-              <Image src="/logos/logo.svg" alt="connectflow" width={30} height={30} />
+              <Image
+                src="/logos/logo.svg"
+                alt="connectflow"
+                width={30}
+                height={30}
+              />
               <span className="font-semibold text-sm">ConnectFlow</span>
             </Link>
           </SidebarMenuButton>
@@ -103,7 +110,9 @@ export const AppSidebar = () => {
                     <SidebarMenuButton
                       tooltip={item.title}
                       isActive={
-                        item.url === "/" ? pathName === "/" : pathName.startsWith(item.url)
+                        item.url === "/"
+                          ? pathName === "/"
+                          : pathName.startsWith(item.url)
                       }
                       asChild
                       className="gap-x-4 h-10 px-4"

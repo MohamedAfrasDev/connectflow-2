@@ -1,8 +1,8 @@
 "use server";
 
 import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
-import { inngest } from "@/inngest/client";
 import { stripeTriggerChannel } from "@/inngest/channels/stripe-trigger";
+import { inngest } from "@/inngest/client";
 
 export type StripeTriggerToken = Realtime.Token<
   typeof stripeTriggerChannel,

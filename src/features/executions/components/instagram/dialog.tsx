@@ -1,6 +1,12 @@
 // dialog.tsx
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +18,13 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -25,14 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
-import { useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma";
 
@@ -70,7 +70,9 @@ export const InstagramDialog = ({
 }: Props) => {
   // register credential type for Instagram — adjust enum name if different
   const { data: credentials, isLoading: isLoadingCredentials } =
-    useCredentialsByType(CredentialType.INSTAGRAM /* replace with CredentialType.INSTAGRAM if present */);
+    useCredentialsByType(
+      CredentialType.INSTAGRAM /* replace with CredentialType.INSTAGRAM if present */,
+    );
 
   const form = useForm<InstagramFormValues>({
     resolver: zodResolver(formSchema),
@@ -108,12 +110,16 @@ export const InstagramDialog = ({
         <DialogHeader>
           <DialogTitle>Instagram (Business) Node</DialogTitle>
           <DialogDescription>
-            Post an image or video to an Instagram Business account via the Graph API.
+            Post an image or video to an Instagram Business account via the
+            Graph API.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="variableName"
@@ -124,7 +130,8 @@ export const InstagramDialog = ({
                     <Input {...field} placeholder="instagramPost" />
                   </FormControl>
                   <FormDescription>
-                    Access the result later with <code>{`{{${varPreview}.postId}}`}</code>
+                    Access the result later with{" "}
+                    <code>{`{{${varPreview}.postId}}`}</code>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -145,7 +152,9 @@ export const InstagramDialog = ({
                         <Select
                           value={controllerField.value || undefined}
                           onValueChange={controllerField.onChange}
-                          disabled={isLoadingCredentials || !credentials?.length}
+                          disabled={
+                            isLoadingCredentials || !credentials?.length
+                          }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select credential" />
@@ -155,7 +164,12 @@ export const InstagramDialog = ({
                               credentials.map((cred) => (
                                 <SelectItem key={cred.id} value={cred.id}>
                                   <div className="flex items-center gap-2">
-                                    <Image src="/logos/instagram.svg" alt="IG" width={16} height={16} />
+                                    <Image
+                                      src="/logos/instagram.svg"
+                                      alt="IG"
+                                      width={16}
+                                      height={16}
+                                    />
                                     {cred.name}
                                   </div>
                                 </SelectItem>
@@ -182,9 +196,15 @@ export const InstagramDialog = ({
                 <FormItem>
                   <FormLabel>Caption</FormLabel>
                   <FormControl>
-                    <Textarea rows={4} {...field} placeholder="Caption or Handlebars template (e.g. {{api.title}})" />
+                    <Textarea
+                      rows={4}
+                      {...field}
+                      placeholder="Caption or Handlebars template (e.g. {{api.title}})"
+                    />
                   </FormControl>
-                  <FormDescription>Supports Handlebars templating.</FormDescription>
+                  <FormDescription>
+                    Supports Handlebars templating.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -197,10 +217,14 @@ export const InstagramDialog = ({
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="https://example.com/image.jpg or {{api.imageUrl}}" />
+                    <Input
+                      {...field}
+                      placeholder="https://example.com/image.jpg or {{api.imageUrl}}"
+                    />
                   </FormControl>
                   <FormDescription>
-                    Must be a publicly accessible image URL (or a Handlebars variable that resolves to one).
+                    Must be a publicly accessible image URL (or a Handlebars
+                    variable that resolves to one).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -220,7 +244,9 @@ export const InstagramDialog = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="IMAGE">Image</SelectItem>
-                        <SelectItem value="VIDEO">Video (not implemented)</SelectItem>
+                        <SelectItem value="VIDEO">
+                          Video (not implemented)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>

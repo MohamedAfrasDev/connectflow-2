@@ -1,13 +1,12 @@
 "use client";
 
-import { Node, NodeProps, useReactFlow } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
-import { BaseExecutionNode } from "../base-execution-node";
-import { useNodeStatus } from "../../hooks/use-node-status";
-import { GMAIL_CHANNEL_NAME } from "@/inngest/channels/gmail";
-import { fetchCustomMailRealtimeToken } from "./action";
 import { CUSTOM_MAIL_CHANNEL_NAME } from "@/inngest/channels/custom_mail";
-import { CustomMailDialog, CustomMailFormValues } from "./dialog";
+import { useNodeStatus } from "../../hooks/use-node-status";
+import { BaseExecutionNode } from "../base-execution-node";
+import { fetchCustomMailRealtimeToken } from "./action";
+import { CustomMailDialog, type CustomMailFormValues } from "./dialog";
 
 type CustomMailNodeData = {
   variableName?: string;
@@ -48,7 +47,7 @@ export const CustomMailNode = memo((props: NodeProps<CustomMailNodeType>) => {
           };
         }
         return node;
-      })
+      }),
     );
   };
 

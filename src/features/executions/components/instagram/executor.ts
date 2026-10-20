@@ -1,10 +1,11 @@
 // executor.ts
-import type { NodeExecutor } from "@/features/executions/types";
+
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
-import prisma from "@/lib/db";
 import ky from "ky";
+import type { NodeExecutor } from "@/features/executions/types";
 import { instagramChannel } from "@/inngest/channels/instagram";
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -51,7 +52,7 @@ export const instagramExecutor: NodeExecutor<InstagramData> = async ({
   if (!credential?.value || !credential.instagramBusinessId) {
     await publish(instagramChannel().status({ nodeId, status: "error" }));
     throw new NonRetriableError(
-      "Instagram node: Credential not found or missing accessToken / instagramBusinessId"
+      "Instagram node: Credential not found or missing accessToken / instagramBusinessId",
     );
   }
 
@@ -60,7 +61,9 @@ export const instagramExecutor: NodeExecutor<InstagramData> = async ({
 
   // Compile templates
   const compiledImageUrl = Handlebars.compile(data.imageUrl)(context);
-  const compiledCaption = data.caption ? Handlebars.compile(data.caption)(context) : "";
+  const compiledCaption = data.caption
+    ? Handlebars.compile(data.caption)(context)
+    : "";
 
   try {
     const result = await step.run("instagram-create-and-publish", async () => {
@@ -75,13 +78,16 @@ export const instagramExecutor: NodeExecutor<InstagramData> = async ({
           },
           throwHttpErrors: false,
           timeout: 20000,
-        }
+        },
       );
 
-      const creationJson = (await creationRes.json()) as { id?: string; error?: unknown };
+      const creationJson = (await creationRes.json()) as {
+        id?: string;
+        error?: unknown;
+      };
       if (!creationJson.id) {
         throw new NonRetriableError(
-          `Instagram node: Failed to create media container. ${JSON.stringify(creationJson.error)}`
+          `Instagram node: Failed to create media container. ${JSON.stringify(creationJson.error)}`,
         );
       }
       const creationId = creationJson.id;
@@ -96,13 +102,16 @@ export const instagramExecutor: NodeExecutor<InstagramData> = async ({
           },
           throwHttpErrors: false,
           timeout: 20000,
-        }
+        },
       );
 
-      const publishJson = (await publishRes.json()) as { id?: string; error?: unknown };
+      const publishJson = (await publishRes.json()) as {
+        id?: string;
+        error?: unknown;
+      };
       if (!publishJson.id) {
         throw new NonRetriableError(
-          `Instagram node: Failed to publish media. ${JSON.stringify(publishJson.error)}`
+          `Instagram node: Failed to publish media. ${JSON.stringify(publishJson.error)}`,
         );
       }
 
