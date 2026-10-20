@@ -6,6 +6,12 @@ A no-code workflow automation platform in the spirit of n8n and Zapier. Build vi
 
 <!-- Add a screenshot or GIF of the editor here: ![Editor](docs/editor.png) -->
 
+## Example
+
+> Stripe payment succeeds → OpenAI writes a confirmation message → Gmail sends it to the customer.
+
+Three nodes on the canvas, connected in a line. Each node lights up as it runs, and the full result is saved in the execution history.
+
 ## Features
 
 - Visual workflow editor (React Flow) with real-time per-node status
@@ -40,13 +46,21 @@ Open http://localhost:3000. Without `mprocs`, run `npm run dev` and `npm run inn
 | `npm run lint` / `format` | Biome check / format |
 | `npm run build` | Production build |
 
+## What I learned / key decisions
+
+- **Durable execution with Inngest** instead of running work in a request handler: retries, step checkpointing and live status come for free.
+- **Executor registry**: every node type implements one `NodeExecutor` function, so new integrations are one folder plus one registry entry, and TypeScript fails the build if a node type has no executor.
+- **Shared context + Handlebars**: nodes pass data through a single object and reference it with `{{variable.path}}` in any text field.
+- **End-to-end types** with tRPC, Prisma and Zod.
+- **Security review**: ownership checks, authenticated API keys, webhook tokens and an SSRF guard (see below).
+
 ## How it works
 
 1. A trigger (button, webhook, or API call) sends a `workflow/execute.workflow` event to Inngest.
 2. The `execute-workflow` function loads the workflow, topologically sorts its nodes, and runs each through an executor looked up in a registry.
 3. Each executor reads the shared context, does its work inside `step.run`, publishes status to the browser over Inngest Realtime, and returns the updated context.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design, code map and data model.
 
 ## Security notes
 
