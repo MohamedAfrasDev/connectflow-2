@@ -40,10 +40,10 @@ What reviewers look for (from the sources at the bottom), checked against this r
 - [x] Executor registry pattern and typed node executors
 
 ## 4. Commit history and collaboration
-- [ ] Meaningful commit messages going forward; ~10 of 50 commits are just "Updated"
-- [ ] Don't rewrite shared history to hide them — just write better ones from now on
-- [ ] Use small PRs/branches for new features, even solo (shows team workflow)
-- [ ] Consistent git identity (commits use three author names: MohamedAfrasDev, Mohamed Afras, Afras)
+- [x] Meaningful commit messages going forward (convention documented in `CONTRIBUTING.md`)
+- [x] History not rewritten (policy stated in `CONTRIBUTING.md`)
+- [x] Branch/PR workflow documented, PR template added; [ ] start using it from the next feature
+- [x] Consistent git identity: local config set and `.mailmap` unifies the three historical names (same email)
 - [x] Conventional-commit style started (`feat:`, `fix:`, `docs:`)
 
 ## 5. Testing and CI (biggest gap)
